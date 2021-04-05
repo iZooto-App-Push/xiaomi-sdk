@@ -45,19 +45,19 @@ public class NotificationEventManager {
     public static void manageNotification(Payload payload) {
         PreferenceUtil preferenceUtil =PreferenceUtil.getInstance(iZooto.appContext);
         if (payload.getFetchURL() == null || payload.getFetchURL().isEmpty())
-            if(preferenceUtil.getStringData(AppConstant.CHECK_PAYLOAD).equalsIgnoreCase(payload.getTitle()) && preferenceUtil.getStringData("MESSAGE").equalsIgnoreCase(payload.getMessage()) && Build.MANUFACTURER.equalsIgnoreCase(AppConstant.BRAND_NAME))
+            if(preferenceUtil.getStringData(AppConstant.CHECK_PAYLOAD).equalsIgnoreCase(payload.getTitle()) && preferenceUtil.getStringData(AppConstant.CHECK_MESSAGE).equalsIgnoreCase(payload.getMessage()))
             {
                 Log.e(AppConstant.NOTIFICATION_MESSAGE,AppConstant.NO);
             }
             else {
                 preferenceUtil.setStringData(AppConstant.CHECK_PAYLOAD,payload.getTitle());
-                preferenceUtil.setStringData("MESSAGE",payload.getMessage());
+                preferenceUtil.setStringData(AppConstant.CHECK_MESSAGE,payload.getMessage());
                 showNotification(payload);
                 Log.e(AppConstant.NOTIFICATION_MESSAGE,AppConstant.YES);
             }
         else {
             addCheck = true;
-            if(preferenceUtil.getStringData(AppConstant.ADD_CHECK).equalsIgnoreCase(payload.getRid()) && Build.MANUFACTURER.equalsIgnoreCase(AppConstant.BRAND_NAME))
+            if(preferenceUtil.getStringData(AppConstant.ADD_CHECK).equalsIgnoreCase(payload.getRid()) )
             {
                 Log.e(AppConstant.NOTIFICATION_MESSAGE,AppConstant.NO);
             }

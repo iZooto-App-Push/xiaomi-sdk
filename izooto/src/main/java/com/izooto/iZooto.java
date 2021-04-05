@@ -108,20 +108,11 @@ public class iZooto {
                                 mIzooToAppId = jsonObject.optString(AppConstant.APPPID);
                                 preferenceUtil.setiZootoID(AppConstant.APPPID,mIzooToAppId);
                                 trackAdvertisingId();
-
-                              //  String  mi_apiKey ="5611892047046";
-                               // String  mi_appID="2882303761518920046";
-                               //  String mi_apiKey ="5731895865690";
-                               // String mi_appID="2882303761518958690";
                                 if(mKey!="" && mId!="")
                                 {
-
                                    XiaomiSDKHandler xiaomiSDKHandler =new XiaomiSDKHandler(iZooto.appContext,mId,mKey);
                                     xiaomiSDKHandler.onMIToken();
-
                                 }
-
-
                                 if (senderId != null && !senderId.isEmpty()) {
                                     init(context, apiKey, appId);
                                 } else {

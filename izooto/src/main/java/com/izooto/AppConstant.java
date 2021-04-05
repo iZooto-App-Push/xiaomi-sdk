@@ -268,6 +268,7 @@ public interface AppConstant {
     String IS_LAUNCH_FIRST_TIME= "isLaunchFirstTime";
     String VER_= "&ver=";
     String ISID_= "&isid=";
+    String CHECK_MESSAGE="MESSAGE";
 
 }
 
