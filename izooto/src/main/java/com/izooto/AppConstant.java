@@ -269,6 +269,11 @@ public interface AppConstant {
     String VER_= "&ver=";
     String ISID_= "&isid=";
     String CHECK_MESSAGE="MESSAGE";
+    String IS_HYBRID_SDK = "hybrid";
+
+    String CURRENT_DATE_VIEW = "currentDateView";
+    String CURRENT_DATE_CLICK = "currentDateClick";
+
 
 }
 

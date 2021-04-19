@@ -18,10 +18,10 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 class Global {
-    static def POM_NAME = 'xiaomi-sdk'
-    static def POM_ARTIFACT_ID = 'xiaomi-sdk'
+    static def POM_NAME = 'power-push'
+    static def POM_ARTIFACT_ID = 'power-push'
     static def POM_PACKAGING = 'aar'
-    static def VERSION_NAME = '0.0.2'
+    static def VERSION_NAME = '1.0.0'
     static def GROUP_ID = 'com.izooto'
     static def POM_DESCRIPTION = 'Push Notification Services'
     static def POM_URL = 'https://github.com/izooto-mobile-sdk/xiaomi-sdk'

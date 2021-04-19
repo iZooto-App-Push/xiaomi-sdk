@@ -50,7 +50,6 @@ public class XiaomiSDKHandler implements XiaomiSDKHandlerListener {
                 Log.e("Token",token);
 
         } catch (Throwable t) {
-            Log.e(XIAOMI_LOG_TAG,"exception "+t);
         }
 
         return token;
@@ -63,9 +62,6 @@ public class XiaomiSDKHandler implements XiaomiSDKHandlerListener {
 
         } catch (Throwable throwable) {
             isRegistered = false;
-            Log.e("Exception Occure",throwable.getMessage());
-
-          // throw new RegistrationException("Registration failed for appId " + appId + " and appKey " + appKey);
         }
     }
     boolean shouldInit(String mainProcessName) {

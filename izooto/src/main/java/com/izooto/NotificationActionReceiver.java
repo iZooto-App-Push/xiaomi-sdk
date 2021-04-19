@@ -14,7 +14,6 @@ import org.json.JSONObject;
 
 import java.net.URLEncoder;
 import java.util.HashMap;
-import java.util.List;
 
 public class NotificationActionReceiver extends BroadcastReceiver {
 
@@ -35,6 +34,9 @@ public class NotificationActionReceiver extends BroadcastReceiver {
     private String btn2Title;
     private String clickIndex = "0";
     private String lastClickIndex = "0";
+    public static String notificationClick = "";
+    public static String WebViewClick = "";
+
 
 
     @Override
@@ -43,21 +45,21 @@ public class NotificationActionReceiver extends BroadcastReceiver {
 
         context.sendBroadcast(it);
         getBundleData(context, intent);
-        String appVersion = Util.getSDKVersion();
-        mUrl.replace(AppConstant.BROWSERKEYID, PreferenceUtil.getInstance(iZooto.appContext).getStringData(AppConstant.FCM_DEVICE_TOKEN));
+        String appVersion = Util.getSDKVersion(context);
+        mUrl.replace(AppConstant.BROWSERKEYID, PreferenceUtil.getInstance(context).getStringData(AppConstant.FCM_DEVICE_TOKEN));
         getBundleData(context, intent);
         try {
-            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
 
             if (btncount!=0) {
-                api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID)+ AppConstant.VER_ + appVersion +
-                        AppConstant.CID_ + cid + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click&btn=" + btncount;
-}
+                api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID)+ "&ver=" + appVersion +
+                        AppConstant.CID_ + cid + AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click&btn=" + btncount;
+            }
             else
             {
-                api_url = AppConstant.API_PID +preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.VER_ + appVersion +
-                        AppConstant.CID_  + cid + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click";
- }
+                api_url = AppConstant.API_PID +preferenceUtil.getiZootoID(AppConstant.APPPID) + "&ver=" + appVersion +
+                        AppConstant.CID_  + cid + AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click";
+            }
 
             if(clickIndex.equalsIgnoreCase("1")) {
                 RestClient.postRequest(RestClient.NOTIFICATIONCLICK + api_url, new RestClient.ResponseHandler() {
@@ -71,46 +73,49 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                     @Override
                     void onSuccess(String response) {
                         super.onSuccess(response);
-                        // Log.e("Click","call");
+                        Log.e("Clk","C");
                     }
                 });
             }
-            if (lastClickIndex.equalsIgnoreCase("1")){
-                String encodeData = "";
-                try {
-                    HashMap<String, Object> data = new HashMap<>();
-                    data.put(AppConstant.LAST_NOTIFICAION_CLICKED, true);
-                    JSONObject jsonObject = new JSONObject(data);
-                    encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+            if (lastClickIndex.equalsIgnoreCase("1")) {
+                String time = preferenceUtil.getStringData(AppConstant.CURRENT_DATE_CLICK);
+                if (!time.equalsIgnoreCase(Util.getTime())) {
+                    preferenceUtil.setStringData(AppConstant.CURRENT_DATE_CLICK, Util.getTime());
+                    String encodeData = "";
+                    try {
+                        HashMap<String, Object> data = new HashMap<>();
+                        data.put(AppConstant.LAST_NOTIFICAION_CLICKED, true);
+                        JSONObject jsonObject = new JSONObject(data);
+                        encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    String lastClickAPIUrl = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.VER_ + appVersion +
+                            AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.VAL + encodeData + AppConstant.ACT + "add" + AppConstant.ISID_ + "1" + AppConstant.ET_ + "userp";
+                    RestClient.postRequest(RestClient.LASTNOTIFICATIONCLICKURL + lastClickAPIUrl, new RestClient.ResponseHandler() {
+                        @Override
+                        void onFailure(int statusCode, String response, Throwable throwable) {
+                            super.onFailure(statusCode, response, throwable);
+                        }
+
+                        @Override
+                        void onSuccess(String response) {
+                            super.onSuccess(response);
+                            Log.e("L","c");
+                        }
+                    });
                 }
-
-                String lastClickAPIUrl = AppConstant.API_PID +preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.VER_ + appVersion +
-                        AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.VAL + encodeData + AppConstant.ACT + "add" + AppConstant.ISID_ + "1" + AppConstant.ET_ + "userp";
-                RestClient.postRequest(RestClient.LASTNOTIFICATIONCLICKURL + lastClickAPIUrl, new RestClient.ResponseHandler() {
-
-
-                    @Override
-                    void onFailure(int statusCode, String response, Throwable throwable) {
-                        super.onFailure(statusCode, response, throwable);
-                    }
-
-                    @Override
-                    void onSuccess(String response) {
-                        super.onSuccess(response);
-                        // Log.e("Click","call");
-                    }
-                });
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+
         if (additionalData.equalsIgnoreCase(""))
         {
             additionalData = "1";
         }
+        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
 
 
         if (!additionalData.equalsIgnoreCase("1") && inApp >=0)
@@ -127,33 +132,40 @@ public class NotificationActionReceiver extends BroadcastReceiver {
             hashMap.put(AppConstant.BUTTON_URL_2,act2URL);
             hashMap.put(AppConstant.ACTION_TYPE, String.valueOf(btncount));
             JSONObject jsonObject = new JSONObject(hashMap);
-            iZooto.notificationActionHandler(jsonObject.toString());
+            if (!preferenceUtil.getBoolean(AppConstant.IS_HYBRID_SDK))
+                iZooto.notificationActionHandler(jsonObject.toString());
+            else {
+                if (Util.isAppInForeground(context))
+                    iZooto.notificationActionHandler(jsonObject.toString());
+                else
+                    notificationClick = jsonObject.toString();
+            }
+            if (preferenceUtil.getBoolean(AppConstant.IS_HYBRID_SDK)) {
+                launchApp(context);
+            }
         }
         else
         {
+
             if (inApp == 1 && phoneNumber.equalsIgnoreCase(AppConstant.NO)) {
-                if (iZooto.mBuilder!=null && iZooto.mBuilder.mWebViewListener!=null){
-                    iZooto.notificationInAppAction(mUrl);
-                }else
-                    iZootoWebViewActivity.startActivity(context, mUrl);
-            }else if (inApp == 2 && phoneNumber.equalsIgnoreCase(AppConstant.NO)){
-                PackageManager pm = context.getPackageManager();
-                Intent LaunchIntent = null;
-                String name = "";
-                try {
-                    if (pm != null && !Util.isAppInForeground(iZooto.appContext)) {
-                        ApplicationInfo app = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
-                        name = (String) pm.getApplicationLabel(app);
-                        LaunchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
-                        Intent intentAppLaunch = LaunchIntent; // new Intent();
-                        intentAppLaunch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        context.startActivity(intentAppLaunch);
+                {
+                    if (iZooto.mBuilder!=null && iZooto.mBuilder.mWebViewListener!=null && !preferenceUtil.getBoolean(AppConstant.IS_HYBRID_SDK)){
+                        iZooto.notificationInAppAction(mUrl);
+                    }else if (preferenceUtil.getBoolean(AppConstant.IS_HYBRID_SDK)) {
+                        if (Util.isAppInForeground(context))
+                            iZooto.notificationInAppAction(mUrl);
+                        else {
+                            WebViewClick = mUrl;
+                            launchApp(context);
+                        }
                     }
-                    Log.d(AppConstant.APP_NAME_TAG + "Found it:",name);
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
+                    else
+                        iZootoWebViewActivity.startActivity(context, mUrl);
                 }
+            }else if (inApp == 2 && phoneNumber.equalsIgnoreCase(AppConstant.NO)){
+                launchApp(context);
             }
+
             else {
                 try {
                     if (phoneNumber.equalsIgnoreCase(AppConstant.NO)) {
@@ -167,11 +179,29 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                     }
 
                 } catch (Exception ex) {
-                    Log.e("ex", ex.toString());
+                    Log.e(AppConstant.APP_NAME_TAG, ex.toString());
                 }
             }
         }
 
+    }
+    private void launchApp(Context context){
+        PackageManager pm = context.getPackageManager();
+        Intent LaunchIntent = null;
+        String name = "";
+        try {
+            if (pm != null && !Util.isAppInForeground(context)) {
+                ApplicationInfo app = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0);
+                name = (String) pm.getApplicationLabel(app);
+                LaunchIntent = pm.getLaunchIntentForPackage(context.getPackageName());
+                Intent intentAppLaunch = LaunchIntent; // new Intent();
+                intentAppLaunch.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                context.startActivity(intentAppLaunch);
+            }
+            Log.d(AppConstant.APP_NAME_TAG + "Found it:",name);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     private void getBundleData(Context context, Intent intent) {

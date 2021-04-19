@@ -122,10 +122,16 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
     @Override
     public void onCommandResult(Context context, MiPushCommandMessage miPushCommandMessage) {
         super.onCommandResult(context, miPushCommandMessage);
-        PreferenceUtil preferenceUtils = PreferenceUtil.getInstance(context);
-        preferenceUtils.setStringData(AppConstant.XiaomiToken,miPushCommandMessage.getCommandArguments().toString().replace("[","").replace("]",""));
-        Log.e(AppConstant.XiaomiToken,miPushCommandMessage.getCommandArguments().toString().replace("[","").replace("]",""));
+        try {
+            PreferenceUtil preferenceUtils = PreferenceUtil.getInstance(context);
+            preferenceUtils.setStringData(AppConstant.XiaomiToken, miPushCommandMessage.getCommandArguments().toString().replace("[", "").replace("]", ""));
+            Log.e(AppConstant.XiaomiToken, miPushCommandMessage.getCommandArguments().toString().replace("[", "").replace("]", ""));
 
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
 }
 

@@ -51,6 +51,8 @@ public class iZooto {
     public static String inAppOption;
     @SuppressLint("StaticFieldLeak")
     static Activity curActivity;
+    public static boolean isHybrid = false; //check for SDK(Flutter,React native)
+
     private static String advertisementID;
     public static void setSenderId(String senderId) {
         iZooto.senderId = senderId;
@@ -137,9 +139,7 @@ public class iZooto {
     private static void init(final Context context, String apiKey, String appId) {
 
         FCMTokenGenerator fcmTokenGenerator = new FCMTokenGenerator();
-        fcmTokenGenerator.initFireBaseApp(senderId);
         fcmTokenGenerator.getToken(context, senderId, apiKey, appId, new TokenGenerator.TokenGenerationHandler() {
-
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void complete(String id) {
@@ -148,6 +148,8 @@ public class iZooto {
                 if (util.isInitializationValid()) {
                     Lg.i(AppConstant.APP_NAME_TAG, AppConstant.DEVICETOKEN  + preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
                     registerToken();
+                    if (iZooto.isHybrid)
+                        preferenceUtil.setBooleanData(AppConstant.IS_HYBRID_SDK, iZooto.isHybrid);
                     lastVisitApi(appContext);
                     ActivityLifecycleListener.registerActivity((Application)appContext);
                     setCurActivity(context);
@@ -247,8 +249,8 @@ public class iZooto {
     private static void registerToken() {
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
         if (!preferenceUtil.getBoolean(AppConstant.IS_TOKEN_UPDATED)) {
-                      String api_url = AppConstant.ADDURL + AppConstant.STYPE + AppConstant.PID + mIzooToAppId + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.TIMEZONE + System.currentTimeMillis() + AppConstant.APPVERSION + Util.getSDKVersion() +
-                    AppConstant.OS + AppConstant.SDKOS + AppConstant.ALLOWED_ + AppConstant.ALLOWED + AppConstant.ANDROID_ID + Util.getAndroidId(appContext) + AppConstant.CHECKSDKVERSION +Util.getSDKVersion()+AppConstant.LANGUAGE+Util.getDeviceLanguage() +
+                      String api_url = AppConstant.ADDURL + AppConstant.STYPE + AppConstant.PID + mIzooToAppId + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.TIMEZONE + System.currentTimeMillis() + AppConstant.APPVERSION + Util.getSDKVersion(iZooto.appContext) +
+                    AppConstant.OS + AppConstant.SDKOS + AppConstant.ALLOWED_ + AppConstant.ALLOWED + AppConstant.ANDROID_ID + Util.getAndroidId(appContext) + AppConstant.CHECKSDKVERSION +Util.getSDKVersion(iZooto.appContext)+AppConstant.LANGUAGE+Util.getDeviceLanguage() +
                     AppConstant.TOKEN + preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN) + AppConstant.ADVERTISEMENTID +preferenceUtil.getStringData(AppConstant.ADVERTISING_ID)+AppConstant.XIAOMITOKEN+preferenceUtil.getStringData(AppConstant.XiaomiToken)+ AppConstant.PACKAGE_NAME+appContext.getPackageName();
             try {
                 String deviceName = URLEncoder.encode(Util.getDeviceName(), AppConstant.UTF);
@@ -451,7 +453,7 @@ public class iZooto {
     private static void getNotificationAPI(Context context,int value){
 
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
-        String appVersion = Util.getSDKVersion();
+        String appVersion = Util.getSDKVersion(iZooto.appContext);
         String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ANDROID_ID + Util.getAndroidId(appContext)
                 + AppConstant.BTYPE_+ AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.APPVERSION + appVersion + AppConstant.PTE_ + AppConstant.PTE +
                 AppConstant.OS +AppConstant.SDKOS  + AppConstant.PT_+ AppConstant.PT + AppConstant.GE_ + AppConstant.GE + AppConstant.ACTION + value;
@@ -645,7 +647,7 @@ public class iZooto {
             //     + AppConstant.BTYPE_ + AppConstant.BTYPE +AppConstant.DTYPE_ + AppConstant.DTYPE  +AppConstant.APPVERSION + Util.getSDKVersion() + AppConstant.PTE_ + AppConstant.PTE +
             //   AppConstant.OS + AppConstant.SDKOS + AppConstant.PT_+ AppConstant.PT + AppConstant.GE_ + AppConstant.GE + AppConstant.ACTION + value;
             String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext)
-                    + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.APPVERSION + Util.getSDKVersion() + AppConstant.PTE_ + AppConstant.PTE +
+                    + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.APPVERSION + Util.getSDKVersion(iZooto.appContext) + AppConstant.PTE_ + AppConstant.PTE +
                     AppConstant.OS + AppConstant.SDKOS + AppConstant.PT_ + AppConstant.PT + AppConstant.GE_ + AppConstant.GE + AppConstant.ACTION + value;
             RestClient.postRequest(RestClient.SUBSCRIPTION_API + api_url, new RestClient.ResponseHandler() {
                 @Override
