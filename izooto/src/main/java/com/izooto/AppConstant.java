@@ -274,7 +274,29 @@ public interface AppConstant {
     String CURRENT_DATE_VIEW = "currentDateView";
     String CURRENT_DATE_CLICK = "currentDateClick";
 
-
+    String AD_NETWORK="an";
+    String GLOBAL="g";
+    String AD_TYPE="tp";
+    String SDKVERSION="1.0.1";
+    String QSDK_VERSION="&av=";
+    String SDKTYPE="&sn=";
+    String SDK="SDKVERSION";
+    String MEDIATION="Mediation";
+    String CHECK_CREATED_ON="CT";
+    String CHECK_RID="RID";
+    String CHECK_TTL="TTL";
+    String NOTIFICATION_DUPLICATE="Add";
+    String PUSH_TYPE="&ct=";
+    String PUSH="push_type";
+    String CHECK_XIAOMI="Check";
+    String HMS_TOKEN = "hms_token";
+    String IS_UPDATED_HMS_TOKEN = "hms_token";
+    String KEY_HMS="&ht=";
+    String HMS_APP_ID="hms_appId";
+    String HMS="Huawei";
+    String PUSH_HMS="hms";
+    String PUSH_FCM="fcm";
+    String PUSH_XIAOMI="xiomi";
 }
 
 

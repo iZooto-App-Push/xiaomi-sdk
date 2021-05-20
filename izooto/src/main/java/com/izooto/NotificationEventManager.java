@@ -26,21 +26,20 @@ import android.widget.RemoteViews;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.text.HtmlCompat;
-
 import com.izooto.shortcutbadger.ShortcutBadger;
+import com.xiaomi.mipush.sdk.help.HelpService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
 public class NotificationEventManager {
     private static Bitmap notificationIcon, notificationBanner;//,act1Icon,act2Icon;
     private static int icon;
@@ -48,15 +47,214 @@ public class NotificationEventManager {
     private static int priority,lockScreenVisibility;
     private static boolean addCheck;
     private static String lastView_Click ="0";
+    private static boolean isCheck;
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static void manageNotification(Payload payload) {
-        if (payload.getFetchURL() == null || payload.getFetchURL().isEmpty())
-            showNotification(payload);
-        else {
-            addCheck = true;
-            processPayload(payload);
+        PreferenceUtil preferenceUtil =PreferenceUtil.getInstance(iZooto.appContext);
+        if (payload.getFetchURL() == null || payload.getFetchURL().isEmpty()) {
+            addCheck = false;
+            try {
+                if (!preferenceUtil.getStringData(AppConstant.HMS_TOKEN).isEmpty()) {
+                    showNotification(payload);
+                } else {
+                    if (!preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty()) {
+                        String data = preferenceUtil.getStringData(AppConstant.NOTIFICATION_DUPLICATE);
+                        JSONArray jsonArray = new JSONArray();
+                        JSONObject jsonObject = new JSONObject();
 
-        }
+                        if (!data.isEmpty()) {
+
+                            JSONArray jsonArray1 = new JSONArray(data);
+                            if (jsonArray1.length() > 150) {
+                                long currentTime = System.currentTimeMillis(); //fetch start time
+
+                                for (int i = 0; i < jsonArray1.length(); i++) {
+                                    JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
+                                    if ((currentTime - (Long.parseLong(jsonObject2.getString(AppConstant.CHECK_CREATED_ON)))) > Long.parseLong(payload.getTime_to_live())) {
+                                        jsonArray1.remove(i);
+                                    } else {
+                                        if (i < 10) {
+                                            jsonArray1.remove(i);
+                                        }
+                                    }
+
+
+                                }
+                                preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+
+                            } else {
+                                if (jsonArray1.length() > 0) {
+                                    long currentTime = System.currentTimeMillis(); //fetch start time
+
+                                    for (int index = 0; index < jsonArray1.length(); index++) {
+
+                                        JSONObject jsonObject1 = jsonArray1.getJSONObject(index);
+//                                    if((currentTime-(Long.parseLong(jsonObject1.getString(AppConstant.CHECK_CREATED_ON))))>Long.parseLong(payload.getTime_to_live()))
+//                                    {
+//                                        jsonArray1.remove(index);
+//                                        Log.e("TTL","remove");
+//
+//                                    }
+                                        if (jsonObject1.getString(AppConstant.CHECK_CREATED_ON).equalsIgnoreCase(payload.getCreated_Time()) && jsonObject1.getString(AppConstant.CHECK_RID).equalsIgnoreCase(payload.getRid())) {
+                                            isCheck = true;
+                                            jsonArray1.remove(index);
+
+                                        } else {
+                                            isCheck = false;
+
+                                        }
+
+                                    }
+
+                                    if (isCheck) {
+                                        preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+                                    } else {
+                                        showNotification(payload);
+                                        jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                        jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                        jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                        jsonArray1.put(jsonObject);
+                                        preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+
+                                    }
+                                } else {
+                                    showNotification(payload);
+                                    jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                    jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                    jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                    jsonArray.put(jsonObject);
+                                    preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
+                                }
+                            }
+
+                        } else {
+                            if (!preferenceUtil.getStringData("Title").equalsIgnoreCase(payload.getTitle()) && !preferenceUtil.getStringData("MESSAGE").equalsIgnoreCase(payload.getMessage())) {
+                                jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                jsonArray.put(jsonObject);
+                                preferenceUtil.setStringData("Title", payload.getTitle());
+                                preferenceUtil.setStringData("MESSAGE", payload.getMessage());
+                                showNotification(payload);
+                                preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
+                            }
+                        }
+                    } else {
+                        showNotification(payload);
+                    }
+                }
+            }
+            catch(Exception ex)
+                {
+                    Log.v("Data", "0" + ex.toString());
+
+                }
+
+            }
+        else{
+                addCheck = true;
+                try {
+                    if (!preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty()) {
+                        String data = preferenceUtil.getStringData(AppConstant.NOTIFICATION_DUPLICATE);
+
+                        JSONArray jsonArray = new JSONArray();
+                        JSONObject jsonObject = new JSONObject();
+
+                        if (!data.isEmpty()) {
+
+                            JSONArray jsonArray1 = new JSONArray(data);
+                            if (jsonArray1.length() > 150) {
+                                long currentTime = System.currentTimeMillis(); //fetch start time
+
+                                for (int i = 0; i < jsonArray1.length(); i++) {
+                                    JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
+                                    if ((currentTime - (Long.parseLong(jsonObject2.getString(AppConstant.CHECK_CREATED_ON)))) > Long.parseLong(payload.getTime_to_live())) {
+                                        jsonArray1.remove(i);
+                                    } else {
+                                        if (i < 10) {
+                                            jsonArray1.remove(i);
+                                        }
+                                    }
+
+
+                                }
+                                preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+
+                            } else {
+                                if (jsonArray1.length() > 0) {
+                                    for (int index = 0; index < jsonArray1.length(); index++) {
+                                        JSONObject jsonObject1 = jsonArray1.getJSONObject(index);
+//                                    if((currentTime-(Long.parseLong(jsonObject1.getString(AppConstant.CHECK_CREATED_ON))))>Long.parseLong(payload.getTime_to_live()))
+//                                    {
+//                                        jsonArray1.remove(index);
+//                                        Log.e("TTL","remove");
+//                                    }
+                                        if (jsonObject1.getString(AppConstant.CHECK_CREATED_ON).equalsIgnoreCase(payload.getCreated_Time()) && jsonObject1.getString(AppConstant.CHECK_RID).equalsIgnoreCase(payload.getRid())) {
+                                            isCheck = true;
+                                            jsonArray1.remove(index);
+
+
+                                        } else {
+                                            isCheck = false;
+
+                                        }
+
+                                    }
+
+                                    if (isCheck) {
+                                        preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+                                    } else {
+                                        if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                                            showNotification(payload);
+                                        } else {
+                                            processPayload(payload);
+                                        }
+                                        jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                        jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                        jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                        jsonArray1.put(jsonObject);
+                                        preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+
+                                    }
+                                } else {
+                                    jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                    jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                    jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                    jsonArray.put(jsonObject);
+                                    preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
+                                    if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                                        showNotification(payload);
+                                    } else {
+                                        processPayload(payload);
+                                    }
+                                }
+                            }
+
+                        } else {
+                            jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                            jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                            jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                            jsonArray.put(jsonObject);
+                            if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                                showNotification(payload);
+                            } else {
+                                processPayload(payload);
+                            }
+                            preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
+                        }
+                    } else {
+                        if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                            showNotification(payload);
+                        } else {
+                            processPayload(payload);
+                        }
+                    }
+                } catch (Exception ex) {
+                    Log.v("Data", "0" + ex.toString());
+
+                }
+            }
 
     }
 
@@ -72,7 +270,6 @@ public class NotificationEventManager {
                         if(json instanceof JSONObject)
                         {
                             JSONObject jsonObject = new JSONObject(response);
-
                             parseJson(payload,jsonObject);
 
                         }
@@ -124,10 +321,10 @@ public class NotificationEventManager {
             payload.setInapp(0);
             if(payload.getTitle()!=null && !payload.getTitle().equalsIgnoreCase("")) {
                 showNotification(payload);
-                Log.e("Notification Send","Yes");
+                Log.v("Notification Send","Yes");
             }
             else {
-                Log.e("Notification Send","No");
+                Log.v("Notification Send","No");
             }
 
 
@@ -241,7 +438,7 @@ public class NotificationEventManager {
             }
         }
     }
-    private static void receiveAds(final Payload payload){
+    public static void receiveAds(final Payload payload){
 
         final Handler handler = new Handler(Looper.getMainLooper());
         final Runnable notificationRunnable = new Runnable() {
@@ -977,6 +1174,7 @@ public class NotificationEventManager {
         intent.putExtra(AppConstant.ACT2URL, payload.getAct2link());
         intent.putExtra(AppConstant.CLICKINDEX, finalClickIndex);
         intent.putExtra(AppConstant.LASTCLICKINDEX, lastClick);
+        intent.putExtra(AppConstant.PUSH,payload.getPush_type());
 
 
         return intent;
@@ -987,7 +1185,7 @@ public class NotificationEventManager {
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
 
         String api_url = AppConstant.API_PID +  preferenceUtil.getiZootoID(AppConstant.APPPID) +
-                AppConstant.CID_ + payload.getId() + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.RID_ + payload.getRid() + "&op=view";
+                AppConstant.CID_ + payload.getId() + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.RID_ + payload.getRid() + "&op=view"+AppConstant.PUSH_TYPE+payload.getPush_type();
         RestClient.postRequest(RestClient.IMPRESSION_URL + api_url, new RestClient.ResponseHandler() {
             @Override
             void onFailure(int statusCode, String response, Throwable throwable) {
@@ -998,7 +1196,8 @@ public class NotificationEventManager {
             void onSuccess(String response) {
                 super.onSuccess(response);
                 if (payload != null)
-                    Log.e("imp","call");
+                    Log.v("imp","call");
+
 
             }
         });
@@ -1100,9 +1299,10 @@ public class NotificationEventManager {
                 @Override
                 void onSuccess(String response) {
                     super.onSuccess(response);
-                    Log.e("l", "v");
+                    Log.v("l", "v");
                 }
             });
         }
     }
+
 }

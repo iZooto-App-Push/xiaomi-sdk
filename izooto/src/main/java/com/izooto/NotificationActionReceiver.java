@@ -36,6 +36,8 @@ public class NotificationActionReceiver extends BroadcastReceiver {
     private String lastClickIndex = "0";
     public static String notificationClick = "";
     public static String WebViewClick = "";
+    public  static  String medClick="";
+    private String pushType;
 
 
 
@@ -53,14 +55,13 @@ public class NotificationActionReceiver extends BroadcastReceiver {
 
             if (btncount!=0) {
                 api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID)+ "&ver=" + appVersion +
-                        AppConstant.CID_ + cid + AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click&btn=" + btncount;
+                        AppConstant.CID_ + cid + AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click&btn=" + btncount+AppConstant.PUSH_TYPE+pushType;
             }
             else
             {
                 api_url = AppConstant.API_PID +preferenceUtil.getiZootoID(AppConstant.APPPID) + "&ver=" + appVersion +
-                        AppConstant.CID_  + cid + AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click";
+                        AppConstant.CID_  + cid + AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.RID_ + rid + AppConstant.NOTIFICATION_OP + "click"+AppConstant.PUSH_TYPE+pushType;
             }
-
             if(clickIndex.equalsIgnoreCase("1")) {
                 RestClient.postRequest(RestClient.NOTIFICATIONCLICK + api_url, new RestClient.ResponseHandler() {
 
@@ -73,7 +74,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                     @Override
                     void onSuccess(String response) {
                         super.onSuccess(response);
-                        Log.e("Clk","C");
+                        Log.v("Clk","C");
                     }
                 });
             }
@@ -101,7 +102,7 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                         @Override
                         void onSuccess(String response) {
                             super.onSuccess(response);
-                            Log.e("L","c");
+                            Log.v("L","c");
                         }
                     });
                 }
@@ -109,13 +110,26 @@ public class NotificationActionReceiver extends BroadcastReceiver {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+        if(preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+            if (AdMediation.clicksData.size() > 0) {
+                for (int i = 0; i < AdMediation.clicksData.size(); i++) {
+                    if (i == AdMediation.clicksData.size()) {
+                    }
+                    callRandomClick(AdMediation.clicksData.get(i));
+                }
 
+            }
+        }
+        if(medClick!="")
+        {
+            callMediationClicks(medClick);
+        }
 
         if (additionalData.equalsIgnoreCase(""))
         {
             additionalData = "1";
         }
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
 
 
         if (!additionalData.equalsIgnoreCase("1") && inApp >=0)
@@ -179,12 +193,58 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                     }
 
                 } catch (Exception ex) {
-                    Log.e(AppConstant.APP_NAME_TAG, ex.toString());
+                    Log.v(AppConstant.APP_NAME_TAG, ex.toString());
                 }
             }
         }
 
     }
+    private static void callRandomClick(String rv) {
+        if(!rv.isEmpty()) {
+            RestClient.get(rv, new RestClient.ResponseHandler() {
+                @Override
+                void onSuccess(String response) {
+                    super.onSuccess(response);
+                }
+
+                @Override
+                void onFailure(int statusCode, String response, Throwable throwable) {
+                    super.onFailure(statusCode, response, throwable);
+
+                }
+            });
+        }
+    }
+
+    private void callMediationClicks(final String medClick) {
+        try {
+            if(!medClick.isEmpty()) {
+                JSONObject jsonObject = new JSONObject(medClick);
+                RestClient.postRequest1(RestClient.MEDIATION_CLICKS, jsonObject, new RestClient.ResponseHandler() {
+                    @Override
+                    void onSuccess(String response) {
+                        super.onSuccess(response);
+                        NotificationActionReceiver.medClick = "";
+
+
+                    }
+
+                    @Override
+                    void onFailure(int statusCode, String response, Throwable throwable) {
+                        super.onFailure(statusCode, response, throwable);
+
+                    }
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.v("exception ",ex.toString());
+        }
+    }
+
+
+
     private void launchApp(Context context){
         PackageManager pm = context.getPackageManager();
         Intent LaunchIntent = null;
@@ -239,6 +299,8 @@ public class NotificationActionReceiver extends BroadcastReceiver {
                 clickIndex=tempBundle.getString(AppConstant.CLICKINDEX);
             if(tempBundle.containsKey(AppConstant.LASTCLICKINDEX))
                 lastClickIndex=tempBundle.getString(AppConstant.LASTCLICKINDEX);
+            if(tempBundle.containsKey(AppConstant.PUSH))
+                pushType=tempBundle.getString(AppConstant.PUSH);
 
 
 

@@ -13,6 +13,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 
 public class PreferenceUtil {
 
@@ -128,6 +132,23 @@ public class PreferenceUtil {
         SharedPreferences.Editor editor = mSpref.edit();
         editor.putLong(key, value);
         editor.apply();
+    }
+    public void setListData(String key, Set<String> setData) {
+        SharedPreferences.Editor editor = mSpref.edit();
+        editor.putStringSet(key, setData);
+        editor.apply();
+    }
+    public Set<String> getListData(String key) {
+        return mSpref.getStringSet("List",null);
+
+    }
+    public static <T> List<T> convertSetToList(Set<T> set)
+    {
+        // create a list from Set
+        List<T> list = new ArrayList<>(set);
+
+        // return the list
+        return list;
     }
     public void setiZootoID(String key,String id)
     {

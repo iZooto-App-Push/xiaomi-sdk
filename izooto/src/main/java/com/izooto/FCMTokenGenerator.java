@@ -71,7 +71,7 @@ public class FCMTokenGenerator implements TokenGenerator {
         }
         else
         {
-            Log.e(AppConstant.APP_NAME_TAG,"Missing google-service.json file");
+            Log.v(AppConstant.APP_NAME_TAG,"missing google-service.json file");
         }
     }
     private static String  getAPI_KEY()

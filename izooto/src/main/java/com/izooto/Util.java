@@ -112,7 +112,7 @@ public class Util {
 
     public static String getAndroidId(Context mContext){
         String android_id = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-        Log.e(TAG, "android id ---- "+android_id );
+        Log.v(TAG, "android id ---- "+android_id);
         return android_id;
     }
 
@@ -329,5 +329,28 @@ public class Util {
         String currentDate = sdf.format(new Date());
         return currentDate;
     }
+    public static boolean hasHMSLibraries() {
+        return hasHMSAGConnectLibrary() && hasHMSPushKitLibrary();
+    }
+    private static boolean hasHMSAGConnectLibrary() {
+        try {
+            return com.huawei.agconnect.config.AGConnectServicesConfig.class != null;
+        } catch (NoClassDefFoundError e) {
+            return false;
+        }
+    }
+    private static boolean hasHMSPushKitLibrary() {
+        try {
+            return com.huawei.hms.aaid.HmsInstanceId.class != null;
+        } catch (NoClassDefFoundError e) {
+            return false;
+        }
+    }
 
+    public static void sleepTime(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+        }
+    }
 }

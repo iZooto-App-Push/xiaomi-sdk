@@ -73,7 +73,7 @@ public class ShortcutBadger {
             return true;
         } catch (Exception e) {
             if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
-                Log.d(LOG_TAG, "Unable to execute badge", e);
+                Log.v(LOG_TAG, "Unable to execute badge", e);
             }
             return false;
         }
@@ -90,14 +90,14 @@ public class ShortcutBadger {
             boolean launcherReady = initBadger(context);
 
             if (!launcherReady)
-                Log.e("ShortcutBadger"," default launcher available");
+                Log.v("ShortcutBadger"," default launcher available");
                // throw new ShortcutBadgerException("No default launcher available");
         }
 
         try {
             sShortcutBadger.executeBadge(context, sComponentName, badgeCount);
         } catch (Exception e) {
-            Log.e("Handle Exception","ShortcutBadger");
+            Log.v("Handle Exception","ShortcutBadger");
            // throw new ShortcutBadgerException("Unable to execute badge", e);
         }
     }

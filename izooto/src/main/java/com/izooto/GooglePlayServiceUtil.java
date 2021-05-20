@@ -16,7 +16,7 @@ public class GooglePlayServiceUtil {
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(iZooto.appContext);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (apiAvailability.isUserResolvableError(resultCode)) {
-                Toast.makeText(iZooto.appContext, "Play services not available or may be not updated.", Toast.LENGTH_SHORT);
+                Log.i(AppConstant.APP_NAME_TAG, "Play services not available or may be not updated.");
             } else {
                 Log.i(AppConstant.APP_NAME_TAG, "This device is not supported.");
             }

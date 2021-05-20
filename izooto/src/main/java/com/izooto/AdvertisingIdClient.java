@@ -169,7 +169,7 @@ public class AdvertisingIdClient {
     protected void start(final Context context, final Listener listener) {
 
         if (listener == null) {
-            Log.e(AppConstant.APP_NAME_TAG, "getAdvertisingId - Error: null listener, dropping call");
+            Log.v(AppConstant.APP_NAME_TAG, "getAdvertisingId - Error: null listener, dropping call");
         } else {
             mHandler = new Handler(Looper.getMainLooper());
             mListener = listener;
