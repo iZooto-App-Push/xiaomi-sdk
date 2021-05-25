@@ -27,8 +27,6 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
         super.onReceivePassThroughMessage(context, miPushMessage);
         String payload = miPushMessage.getContent();
         Log.v("Push Type","Xiaomi");
-        Log.v("Xiaomi payload",payload);
-
         if(payload!=null && !payload.isEmpty())
          handleNow(context,payload);
 
@@ -55,11 +53,7 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
                     JSONObject payloadObj = new JSONObject(data);
                     if(payloadObj.has(AppConstant.AD_NETWORK) && payloadObj.has(AppConstant.GLOBAL))
                     {
-                       AdMediation.getAdJsonXiaomi(payloadObj);
-                        //JSONArray jsonArray=payloadObj.getJSONArray(AppConstant.AD_NETWORK);
-                       // JSONObject jsonObject=payloadObj.getJSONObject(AppConstant.GLOBAL);
-                       // Log.e("AD",jsonArray.toString());
-                       // Log.e("Global",jsonObject.toString());
+                       AdMediation.getAdNotificationData(payloadObj,AppConstant.PUSH_XIAOMI);
                         preferenceUtil.setBooleanData(AppConstant.MEDIATION,true);
                     }
                     else {
@@ -153,38 +147,8 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
         }
         catch (Exception ex)
         {
-
+         Log.v("XMPush",ex.toString());
         }
-    }
-
-    private void registrationXiaomi(String xiaomiToken,Context context) {
-        Log.e("App","Xiaomi");
-        final PreferenceUtil preferenceUtils = PreferenceUtil.getInstance(context);
-            String api_url = AppConstant.ADDURL + AppConstant.STYPE + AppConstant.PID + preferenceUtils.getiZootoID(AppConstant.APPPID) + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.TIMEZONE + System.currentTimeMillis() + AppConstant.APPVERSION + Util.getSDKVersion(iZooto.appContext) +
-                    AppConstant.OS + AppConstant.SDKOS + AppConstant.ALLOWED_ + AppConstant.ALLOWED + AppConstant.ANDROID_ID + Util.getAndroidId(context) + AppConstant.CHECKSDKVERSION + Util.getSDKVersion(iZooto.appContext) + AppConstant.LANGUAGE + Util.getDeviceLanguage() + AppConstant.QSDK_VERSION + AppConstant.SDKVERSION +
-                    AppConstant.TOKEN +preferenceUtils.getStringData(AppConstant.FCM_DEVICE_TOKEN) + AppConstant.ADVERTISEMENTID + preferenceUtils.getStringData(AppConstant.ADVERTISING_ID) + AppConstant.XIAOMITOKEN + xiaomiToken + AppConstant.PACKAGE_NAME + context.getPackageName() + AppConstant.SDKTYPE + iZooto.SDKDEF;
-            try {
-                String deviceName = URLEncoder.encode(Util.getDeviceName(), AppConstant.UTF);
-                String osVersion = URLEncoder.encode(Build.VERSION.RELEASE, AppConstant.UTF);
-                api_url += AppConstant.ANDROIDVERSION + osVersion + AppConstant.DEVICENAME + deviceName;
-            } catch (UnsupportedEncodingException e) {
-                Lg.e(AppConstant.APP_NAME_TAG, AppConstant.UNEXCEPTION);
-            }
-            RestClient.get(api_url, new RestClient.ResponseHandler() {
-                @Override
-                void onSuccess(final String response) {
-                    super.onSuccess(response);
-                    preferenceUtils.setBooleanData(AppConstant.CHECK_XIAOMI, true);
-
-                }
-
-                @Override
-                void onFailure(int statusCode, String response, Throwable throwable) {
-                    super.onFailure(statusCode, response, throwable);
-
-                }
-            });
-
     }
 }
 

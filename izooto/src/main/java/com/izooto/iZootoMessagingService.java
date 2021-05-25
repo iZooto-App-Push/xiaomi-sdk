@@ -38,20 +38,15 @@ import java.util.Map;
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 public class iZootoMessagingService extends FirebaseMessagingService {
-
     private  Payload payload = null;
-
-
-
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         try {
             if (remoteMessage.getData().size() > 0) {
-                Log.v("Push Type","ISFCM");
-
+                Log.v("Push Type","FCM");
                 Map<String, String> data = remoteMessage.getData();
-                    handleNow(data);
+                handleNow(data);
             }
             if (remoteMessage.getNotification() != null) {
                 sendNotification(remoteMessage);
@@ -65,10 +60,6 @@ public class iZootoMessagingService extends FirebaseMessagingService {
 
 
     }
-
-
-
-
     private void sendNotification(RemoteMessage remoteMessage) {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

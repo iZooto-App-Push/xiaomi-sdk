@@ -163,7 +163,7 @@ public class AdMediation {
        }
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public static void getAdJsonXiaomi(JSONObject data)
+    public static void getAdNotificationData(JSONObject data,String pushType)
     {
         try
         {
@@ -253,10 +253,8 @@ public class AdMediation {
                         payload.setFallBackPath(jsonObject.optString(ShortpayloadConstant.FAll_BACK_PATH));
                         payload.setTime_out(jsonObject.optInt(ShortpayloadConstant.TIME_OUT));
                         payload.setAdTimeOut(payloadObj.optInt(ShortpayloadConstant.AD_TIME_OUT));
-                        payload.setPush_type(AppConstant.PUSH_XIAOMI);
-
+                        payload.setPush_type(pushType);
                         payload.setCreated_Time(jsonObject.optString(ShortpayloadConstant.CREATEDON));
-
                         if(payload.getPassive_flag().equalsIgnoreCase("1") && jsonObject.optString(AppConstant.AD_TYPE).equalsIgnoreCase("6"))
                         {
                             passiveList.add(payload);

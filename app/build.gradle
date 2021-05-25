@@ -11,7 +11,7 @@ android {
         versionName "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
-                izooto_app_id: "a93348eba04f75f86a4d07e3eb88e6f9740bec6a"//"b7d70ad86cbd3664ec38d8a7c294bfd6452cf5e8"//"a93348eba04f75f86a4d07e3eb88e6f9740bec6a"
+                izooto_app_id: "09f06385e06cc10d0fc7a5e1c002cd9338a2c94f"//"b7d70ad86cbd3664ec38d8a7c294bfd6452cf5e8"//"a93348eba04f75f86a4d07e3eb88e6f9740bec6a"
         ]
     }
 
@@ -29,8 +29,6 @@ android {
         implementation 'com.android.support:appcompat-v7:28.0.0'
         //noinspection GradleCompatible
         implementation 'com.huawei.hms:push:5.0.0.300'
-        implementation 'com.huawei.agconnect:agconnect-core:1.4.1.300'
-
         //noinspection GradleCompatible
         implementation 'com.android.support:design:28.0.0'
 //        implementation 'com.izooto:notification-sdk:1.0.1'
@@ -38,8 +36,7 @@ android {
 }
 dependencies {
     implementation project(path: ':izooto')
-    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.appcompat:appcompat:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 }
 apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.huawei.agconnect'

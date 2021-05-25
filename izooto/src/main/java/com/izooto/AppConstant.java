@@ -292,11 +292,14 @@ public interface AppConstant {
     String HMS_TOKEN = "hms_token";
     String IS_UPDATED_HMS_TOKEN = "hms_token";
     String KEY_HMS="&ht=";
-    String HMS_APP_ID="hms_appId";
+    String HMS_APP_ID="hms_app_id";
     String HMS="Huawei";
     String PUSH_HMS="hms";
     String PUSH_FCM="fcm";
     String PUSH_XIAOMI="xiomi";
+    String Check_Notification="CheckData";
+    String Check_YES="true";
+    String Check_NO="false";
 }
 
 

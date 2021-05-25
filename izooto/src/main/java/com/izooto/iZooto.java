@@ -112,14 +112,12 @@ public class iZooto {
                                 mIzooToAppId = jsonObject.optString(AppConstant.APPPID);
                                 preferenceUtil.setiZootoID(AppConstant.APPPID,mIzooToAppId);
                                 trackAdvertisingId();
-                                Log.e("JSONObject",jsonObject.toString()+Util.getAndroidId(context));
                                 if(!mKey.isEmpty() && !mId.isEmpty())
                                 {
-                                   //XiaomiSDKHandler xiaomiSDKHandler =new XiaomiSDKHandler(iZooto.appContext,mId,mKey);
-                                   XiaomiSDKHandler xiaomiSDKHandler =new XiaomiSDKHandler(iZooto.appContext,"2882303761518920046","5611892047046");
+                                    XiaomiSDKHandler xiaomiSDKHandler =new XiaomiSDKHandler(iZooto.appContext,mId,mKey);
                                     xiaomiSDKHandler.onMIToken();
                                 }
-                                if (!hms_appId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase(AppConstant.HMS))
+                                if (!hms_appId.isEmpty())
                                     initHmsService(appContext);
                                 if (senderId != null && !senderId.isEmpty()) {
                                     init(context, apiKey, appId);
@@ -146,14 +144,12 @@ public class iZooto {
         hmsTokenGenerator.getHMSToken(context, new HMSTokenListener.HMSTokenGeneratorHandler() {
             @Override
             public void complete(String id) {
-//                PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-//                preferenceUtil.setStringData(AppConstant.HMS_TOKEN,id);
-                Log.i(AppConstant.APP_NAME_TAG, "complete: id--"+id);
+                Log.i(AppConstant.APP_NAME_TAG, "HMS Token"+id);
             }
 
             @Override
             public void failure(String errorMessage) {
-                Lg.e(AppConstant.APP_NAME_TAG, errorMessage);
+                Lg.v(AppConstant.APP_NAME_TAG, errorMessage);
             }
         });
     }
@@ -270,14 +266,6 @@ public class iZooto {
         Util.sleepTime(10000);
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
         if (!preferenceUtil.getBoolean(AppConstant.IS_TOKEN_UPDATED)) {
-            if(!preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty())
-            {
-              preferenceUtil.setBooleanData(AppConstant.CHECK_XIAOMI,true);
-            }
-            else
-            {
-                preferenceUtil.setBooleanData(AppConstant.CHECK_XIAOMI,false);
-            }
             String api_url = AppConstant.ADDURL + AppConstant.STYPE + AppConstant.PID + mIzooToAppId + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.TIMEZONE + System.currentTimeMillis() + AppConstant.APPVERSION + Util.getSDKVersion(iZooto.appContext) +
                     AppConstant.OS + AppConstant.SDKOS + AppConstant.ALLOWED_ + AppConstant.ALLOWED + AppConstant.ANDROID_ID + Util.getAndroidId(appContext) + AppConstant.CHECKSDKVERSION +Util.getSDKVersion(iZooto.appContext)+AppConstant.LANGUAGE+Util.getDeviceLanguage() +AppConstant.QSDK_VERSION +AppConstant.SDKVERSION+
                     AppConstant.TOKEN +preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN) + AppConstant.ADVERTISEMENTID +preferenceUtil.getStringData(AppConstant.ADVERTISING_ID)+AppConstant.XIAOMITOKEN+preferenceUtil.getStringData(AppConstant.XiaomiToken)+ AppConstant.PACKAGE_NAME+appContext.getPackageName()+AppConstant.SDKTYPE+SDKDEF
@@ -289,7 +277,19 @@ public class iZooto {
             } catch (UnsupportedEncodingException e) {
                 Lg.e(AppConstant.APP_NAME_TAG, AppConstant.UNEXCEPTION);
             }
-            Log.e("RestAPI",RestClient.BASE_URL+api_url);
+            if(!preferenceUtil.getStringData(AppConstant.HMS_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty())
+            {
+                preferenceUtil.setIntData("Counter",3);
+            }
+           else if(!preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty())
+            {
+                preferenceUtil.setIntData("Counter",2);
+            }
+           else
+            {
+                preferenceUtil.setIntData("Counter",1);
+
+            }
             RestClient.postRequest(api_url, new RestClient.ResponseHandler() {
                 @Override
                 void onSuccess(final String response) {
@@ -717,7 +717,6 @@ public class iZooto {
             }
             else {
                 preferenceUtil.setBooleanData(AppConstant.MEDIATION, false);
-
                 JSONObject payloadObj = new JSONObject(data);
                 if (payloadObj.optLong(ShortpayloadConstant.CREATEDON) > PreferenceUtil.getInstance(iZooto.appContext).getLongValue(AppConstant.DEVICE_REGISTRATION_TIMESTAMP)) {
                     payload = new Payload();
