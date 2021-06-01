@@ -272,7 +272,7 @@ public interface AppConstant {
     String AD_NETWORK="an";
     String GLOBAL="g";
     String AD_TYPE="tp";
-    String SDKVERSION="1.0.1";
+    String SDKVERSION="1.0.2";
     String QSDK_VERSION="&av=";
     String SDKTYPE="&sn=";
     String SDK="SDKVERSION";
