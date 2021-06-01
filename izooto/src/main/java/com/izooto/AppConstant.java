@@ -260,9 +260,6 @@ public interface AppConstant {
     String ADD_CHECK="RID";
     String YES="YES";
     String LASTCLICKINDEX= "lastclickIndex";
-    String LAST_NOTIFICAION_CLICKED= "last_notification_clicked";
-    String LAST_NOTIFICAION_VIEWED= "last_notification_viewed";
-    String LAST_WEBSITE_VISIT= "last_website_visit";
     String LANG_= "lang";
     String CURRENT_DATE= "currentDate";
     String IS_LAUNCH_FIRST_TIME= "isLaunchFirstTime";
@@ -271,8 +268,6 @@ public interface AppConstant {
     String CHECK_MESSAGE="MESSAGE";
     String IS_HYBRID_SDK = "hybrid";
 
-    String CURRENT_DATE_VIEW = "currentDateView";
-    String CURRENT_DATE_CLICK = "currentDateClick";
 
     String AD_NETWORK="an";
     String GLOBAL="g";
@@ -300,6 +295,16 @@ public interface AppConstant {
     String Check_Notification="CheckData";
     String Check_YES="true";
     String Check_NO="false";
+    String CFGFORDOMAIN= "cfgfordomain";
+    String LAST_NOTIFICAION_CLICKED= "last_notification_clicked";
+    String LAST_NOTIFICAION_VIEWED= "last_notification_viewed";
+    String LAST_WEBSITE_VISIT= "last_website_visit";
+    String CURRENT_DATE_VIEW = "currentDateView";
+    String CURRENT_DATE_VIEW_WEEKLY = "currentDateViewWeekly";
+    String CURRENT_DATE_VIEW_DAILY = "currentDateViewDaily";
+    String CURRENT_DATE_CLICK = "currentDateClick";
+    String CURRENT_DATE_CLICK_WEEKLY = "currentDateClickWeekly";
+    String CURRENT_DATE_CLICK_DAILY = "currentDateClickDaily";
 }
 
 

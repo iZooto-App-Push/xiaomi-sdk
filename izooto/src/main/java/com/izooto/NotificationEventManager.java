@@ -73,9 +73,7 @@ public class NotificationEventManager {
                     showNotification(payload);
                 } else {
                     processPayload(payload);
-
                 }
-
             }
             else
             {
@@ -456,18 +454,25 @@ public class NotificationEventManager {
 
                 String clickIndex = "0";
                 String impressionIndex ="0";
+                String lastSeventhIndex = "0";
+                String lastNinthIndex = "0";
+
 
                 String data=Util.getIntegerToBinary(payload.getCfg());
                 if(data!=null && !data.isEmpty()) {
                     clickIndex = String.valueOf(data.charAt(data.length() - 2));
                     impressionIndex = String.valueOf(data.charAt(data.length() - 1));
                     lastView_Click = String.valueOf(data.charAt(data.length() - 3));
+                    lastSeventhIndex = String.valueOf(data.charAt(data.length() - 7));
+                    lastNinthIndex = String.valueOf(data.charAt(data.length() - 9));
                 }
                 else
                 {
                     clickIndex = "0";
                     impressionIndex="0";
                     lastView_Click = "0";
+                    lastSeventhIndex = "0";
+                    lastNinthIndex = "0";
 
                 }
 
@@ -621,8 +626,8 @@ public class NotificationEventManager {
                     if(impressionIndex.equalsIgnoreCase("1")) {
                         impressionNotificationApi(payload);
                     }
-                    if (lastView_Click.equalsIgnoreCase("1")){
-                        lastViewNotificationApi();
+                    if (lastView_Click.equalsIgnoreCase("1") || lastSeventhIndex.equalsIgnoreCase("1")){
+                        lastViewNotificationApi(payload, lastView_Click, lastSeventhIndex, lastNinthIndex);
                     }
 
                     iZooto.notificationView(payload);
@@ -674,19 +679,26 @@ public class NotificationEventManager {
 
                 String clickIndex = "0";
                 String impressionIndex ="0";
+                String lastSeventhIndex = "0";
+                String lastNinthIndex = "0";
 
 
                 String data=Util.getIntegerToBinary(payload.getCfg());
                 if(data!=null && !data.isEmpty()) {
                     clickIndex = String.valueOf(data.charAt(data.length() - 2));
                     impressionIndex = String.valueOf(data.charAt(data.length() - 1));
-                    lastView_Click=String.valueOf(data.charAt(data.length()-3));
+                    lastView_Click = String.valueOf(data.charAt(data.length() - 3));
+                    lastSeventhIndex = String.valueOf(data.charAt(data.length() - 7));
+                    lastNinthIndex = String.valueOf(data.charAt(data.length() - 9));
                 }
                 else
                 {
                     clickIndex = "0";
                     impressionIndex="0";
-                    lastView_Click="0";
+                    lastView_Click = "0";
+                    lastSeventhIndex = "0";
+                    lastNinthIndex = "0";
+
                 }
 
                 badgeCountUpdate(payload.getBadgeCount());
@@ -927,8 +939,8 @@ public class NotificationEventManager {
                     if(impressionIndex.equalsIgnoreCase("1")) {
                         impressionNotificationApi(payload);
                     }
-                    if (lastView_Click.equalsIgnoreCase("1")){
-                        lastViewNotificationApi();
+                    if (lastView_Click.equalsIgnoreCase("1") || lastSeventhIndex.equalsIgnoreCase("1")){
+                        lastViewNotificationApi(payload, lastView_Click, lastSeventhIndex, lastNinthIndex);
                     }
                     iZooto.notificationView(payload);
 
@@ -1088,21 +1100,27 @@ public class NotificationEventManager {
 
                     String clickIndex = "0";
                     String impressionIndex ="0";
+                    String lastSeventhIndex = "0";
+                    String lastNinthIndex = "0";
+
 
                     String data=Util.getIntegerToBinary(payload.getCfg());
                     if(data!=null && !data.isEmpty()) {
                         clickIndex = String.valueOf(data.charAt(data.length() - 2));
                         impressionIndex = String.valueOf(data.charAt(data.length() - 1));
                         lastView_Click = String.valueOf(data.charAt(data.length() - 3));
+                        lastSeventhIndex = String.valueOf(data.charAt(data.length() - 7));
+                        lastNinthIndex = String.valueOf(data.charAt(data.length() - 9));
                     }
                     else
                     {
                         clickIndex = "0";
                         impressionIndex="0";
                         lastView_Click = "0";
+                        lastSeventhIndex = "0";
+                        lastNinthIndex = "0";
 
                     }
-
 
                     mBuilder.setNeutralButton(AppConstant.DIALOG_DISMISS, new DialogInterface.OnClickListener() {
                         @Override
@@ -1133,8 +1151,8 @@ public class NotificationEventManager {
                         if(impressionIndex.equalsIgnoreCase("1")) {
                             impressionNotificationApi(payload);
                         }
-                        if (lastView_Click.equalsIgnoreCase("1")){
-                            lastViewNotificationApi();
+                        if (lastView_Click.equalsIgnoreCase("1") || lastSeventhIndex.equalsIgnoreCase("1")){
+                            lastViewNotificationApi(payload, lastView_Click, lastSeventhIndex, lastNinthIndex);
                         }
                         iZooto.notificationView(payload);
 
@@ -1183,18 +1201,24 @@ public class NotificationEventManager {
         intent.putExtra(AppConstant.CLICKINDEX, finalClickIndex);
         intent.putExtra(AppConstant.LASTCLICKINDEX, lastClick);
         intent.putExtra(AppConstant.PUSH,payload.getPush_type());
+        intent.putExtra(AppConstant.CFGFORDOMAIN, payload.getCfg());
+
 
 
         return intent;
     }
 
     private static void impressionNotificationApi(final Payload payload){
-
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
-
+        String imprURL;
+        int dataCfg = Util.getBinaryToDecimal(payload.getCfg());
+        if (dataCfg > 0){
+            imprURL = "https://impr" + dataCfg + ".izooto.com/imp" + dataCfg;
+        }else
+            imprURL = RestClient.IMPRESSION_URL;
         String api_url = AppConstant.API_PID +  preferenceUtil.getiZootoID(AppConstant.APPPID) +
-                AppConstant.CID_ + payload.getId() + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.RID_ + payload.getRid() + "&op=view"+AppConstant.PUSH_TYPE+payload.getPush_type();
-        RestClient.postRequest(RestClient.IMPRESSION_URL + api_url, new RestClient.ResponseHandler() {
+                AppConstant.CID_ + payload.getId() + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.RID_ + payload.getRid() + "&op=view"+AppConstant.PUSH_TYPE+payload.getPush_type();;
+        RestClient.postRequest(imprURL + api_url, new RestClient.ResponseHandler() {
             @Override
             void onFailure(int statusCode, String response, Throwable throwable) {
                 super.onFailure(statusCode, response, throwable);
@@ -1204,8 +1228,7 @@ public class NotificationEventManager {
             void onSuccess(String response) {
                 super.onSuccess(response);
                 if (payload != null)
-                    Log.v("imp","call");
-
+                    Log.e("imp","call");
 
             }
         });
@@ -1283,34 +1306,72 @@ public class NotificationEventManager {
             phone = AppConstant.NO;
         return phone;
     }
-    private static void lastViewNotificationApi(){
+    private static void lastViewNotificationApi(final Payload payload, String lastViewIndex, String seventhCFG, String ninthCFG){
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+        String dayDiff1 = Util.dayDifference(Util.getTime(), preferenceUtil.getStringData(AppConstant.CURRENT_DATE_VIEW_WEEKLY));
+        String updateWeekly = preferenceUtil.getStringData(AppConstant.CURRENT_DATE_VIEW_WEEKLY);
+        String updateDaily = preferenceUtil.getStringData(AppConstant.CURRENT_DATE_VIEW_DAILY);
         String time = preferenceUtil.getStringData(AppConstant.CURRENT_DATE_VIEW);
-        if (!time.equalsIgnoreCase(Util.getTime())) {
-            preferenceUtil.setStringData(AppConstant.CURRENT_DATE_VIEW, Util.getTime());
-            String encodeData = "";
-            try {
-                HashMap<String, Object> data = new HashMap<>();
-                data.put(AppConstant.LAST_NOTIFICAION_VIEWED, true);
-                JSONObject jsonObject = new JSONObject(data);
-                encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-            } catch (Exception ex) {
-                ex.printStackTrace();
+
+        if (seventhCFG.equalsIgnoreCase("1")){
+
+            if (ninthCFG.equalsIgnoreCase("1")){
+                if (!updateDaily.equalsIgnoreCase(Util.getTime())){
+                    preferenceUtil.setStringData(AppConstant.CURRENT_DATE_VIEW_DAILY, Util.getTime());
+                    lastViewNotification(payload);
+                }
+            }else {
+                if (updateWeekly.isEmpty() || Integer.parseInt(dayDiff1) >= 7){
+                    preferenceUtil.setStringData(AppConstant.CURRENT_DATE_VIEW_WEEKLY, Util.getTime());
+                    lastViewNotification(payload);
+                }
             }
-            String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.VER_ + Util.getSDKVersion(iZooto.appContext) +
-                    AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.VAL + encodeData + AppConstant.ACT + "add" + AppConstant.ISID_ + "1" + AppConstant.ET_ + "userp";
-            RestClient.postRequest(RestClient.LASTNOTIFICATIONVIEWURL + api_url, new RestClient.ResponseHandler() {
-                @Override
-                void onFailure(int statusCode, String response, Throwable throwable) {
-                    super.onFailure(statusCode, response, throwable);
-                }
-                @Override
-                void onSuccess(String response) {
-                    super.onSuccess(response);
-                    Log.v("l", "v");
-                }
-            });
+        }else if (lastViewIndex.equalsIgnoreCase("1") && seventhCFG.equalsIgnoreCase("0")){
+            String dayDiff = Util.dayDifference(Util.getTime(), preferenceUtil.getStringData(AppConstant.CURRENT_DATE_VIEW));
+            if (time.isEmpty() || Integer.parseInt(dayDiff) >= 7) {
+                preferenceUtil.setStringData(AppConstant.CURRENT_DATE_VIEW, Util.getTime());
+                lastViewNotification(payload);
+            }
         }
+
+
     }
+
+    private static void lastViewNotification(final Payload payload){
+        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+        String encodeData = "";
+        try {
+            HashMap<String, Object> data = new HashMap<>();
+            data.put(AppConstant.LAST_NOTIFICAION_VIEWED, true);
+            JSONObject jsonObject = new JSONObject(data);
+            encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        String limURL;
+        int dataCfg = Util.getBinaryToDecimal(payload.getCfg());
+
+        if (dataCfg > 0){
+            limURL = "https://lim"+ dataCfg + ".izooto.com/lim" + dataCfg;
+        }else
+            limURL = RestClient.LASTNOTIFICATIONVIEWURL;
+
+        String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.VER_ + Util.getSDKVersion(iZooto.appContext) +
+                AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.VAL + encodeData + AppConstant.ACT + "add" + AppConstant.ISID_ + "1" + AppConstant.ET_ + "userp";
+        RestClient.postRequest(limURL + api_url, new RestClient.ResponseHandler() {
+            @Override
+            void onFailure(int statusCode, String response, Throwable throwable) {
+                super.onFailure(statusCode, response, throwable);
+            }
+
+            @Override
+            void onSuccess(String response) {
+                super.onSuccess(response);
+                Log.v("l", "c");
+
+            }
+        });
+    }
+
 
 }

@@ -353,4 +353,39 @@ public class Util {
         } catch (InterruptedException e) {
         }
     }
+    public static String dayDifference(String currentDate, String previousDate){
+        if (previousDate.isEmpty())
+            return "";
+        String dayDifference = "";
+        try {
+            Date date1;
+            Date date2;
+            SimpleDateFormat dates = new SimpleDateFormat("yyyy.MM.dd");
+            date1 = dates.parse(currentDate);
+            date2 = dates.parse(previousDate);
+            long difference = date1.getTime() - date2.getTime();
+            long differenceDates = difference / (24 * 60 * 60 * 1000);
+            dayDifference = Long.toString(differenceDates);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return dayDifference;
+    }
+    public static int getBinaryToDecimal(int cfg){
+        String fourthDg, fifthDg, sixthDg;
+
+        String data = Util.getIntegerToBinary(cfg);
+        if(data!=null && !data.isEmpty()) {
+            fourthDg = String.valueOf(data.charAt(data.length() - 4));
+            fifthDg = String.valueOf(data.charAt(data.length() - 5));
+            sixthDg = String.valueOf(data.charAt(data.length() - 6));
+        }else {
+            fourthDg = "0";
+            fifthDg = "0";
+            sixthDg = "0";
+        }
+        String dataCFG = sixthDg + fifthDg + fourthDg;
+        int decimalData = Integer.parseInt(dataCFG,2);
+        return decimalData;
+    }
 }
