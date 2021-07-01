@@ -607,6 +607,21 @@ public class NotificationEventManager {
                         channel = new NotificationChannel(channelId,
                                 AppConstant.CHANNEL_NAME, priority);
                     }
+                    if(iZooto.soundID!=null) {
+                        priority = NotificationManagerCompat.IMPORTANCE_HIGH;
+                        channel = new NotificationChannel(channelId,
+                                AppConstant.CHANNEL_NAME, priority);
+                        Uri uri = Util.getSoundUri(iZooto.appContext, iZooto.soundID);
+                        if (uri != null)
+                            channel.setSound(uri, null);
+                        else
+                            channel.setSound(null, null);
+                    }
+                    else
+                    {
+                        channel.setSound(null, null);
+
+                    }
 
                     notificationManager.createNotificationChannel(channel);
                 }
@@ -919,6 +934,21 @@ public class NotificationEventManager {
                         priority = priorityForImportance(payload.getPriority());
                         channel = new NotificationChannel(channelId,
                                 AppConstant.CHANNEL_NAME, priority);
+                    }
+                    if(iZooto.soundID!=null) {
+                        priority = NotificationManagerCompat.IMPORTANCE_HIGH;
+                        channel = new NotificationChannel(channelId,
+                                AppConstant.CHANNEL_NAME, priority);
+                        Uri uri = Util.getSoundUri(iZooto.appContext, iZooto.soundID);
+                        if (uri != null)
+                            channel.setSound(uri, null);
+                        else
+                            channel.setSound(null, null);
+                    }
+                    else
+                    {
+                        channel.setSound(null, null);
+
                     }
 
                     notificationManager.createNotificationChannel(channel);

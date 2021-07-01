@@ -21,6 +21,8 @@
 #-renamesourcefileattribute SourceFile
 -keep class com.izooto.XiaomiPushReceiver{*;}
 -dontwarn com.xiaomi.push.**
-
+-keep class com.izooto.iZootoHmsMessagingService{*;}
+-keep class com.izooto.HMSTokenGenerator{*;}
+-dontwarn com.huawei.**
 
 

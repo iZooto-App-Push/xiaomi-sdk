@@ -52,6 +52,8 @@ public class iZooto {
     @SuppressLint("StaticFieldLeak")
     static Activity curActivity;
     public static String SDKDEF ="power-push";
+    public static String soundID;
+
 
     public static boolean isHybrid = false; //check for SDK(Flutter,React native)
 
@@ -688,6 +690,10 @@ public class iZooto {
                 }
             }
         }
+    }
+    public static void  setNotificationSound(String soundName)
+    {
+        soundID = soundName;
     }
     private static HashMap<String, Object> checkValidationUserProfile(HashMap<String, Object> data,int index){
         HashMap<String, Object>  newList= new HashMap<String, Object>();
