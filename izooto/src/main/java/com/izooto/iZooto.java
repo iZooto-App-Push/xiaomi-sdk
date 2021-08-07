@@ -731,7 +731,6 @@ private static void registerToken() {
                                 @Override
                                 void onSuccess(final String response) {
                                     super.onSuccess(response);
-                                    Log.e("Response","Success PROPERTIES_URL");
                                     preferenceUtil.setStringData(AppConstant.USER_LOCAL_DATA, null);
                                 }
                                 @Override
@@ -740,7 +739,6 @@ private static void registerToken() {
                                 }
                             });
                         } else {
-                            Log.e("TAG", "addUserProperty: else"+ newListUserProfile );
                             JSONObject jsonObjectLocal = new JSONObject(object);
                             preferenceUtil.setStringData(AppConstant.USER_LOCAL_DATA, jsonObjectLocal.toString());
                         }

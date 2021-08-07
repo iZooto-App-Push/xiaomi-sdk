@@ -142,8 +142,6 @@ public class RestClient {
                     os.write(out);
                 }
             }
-            Log.e("Response",url);
-            Log.e("Response1",data.toString());
 
             httpResponse = con.getResponseCode();
             InputStream inputStream;
@@ -258,7 +256,6 @@ public class RestClient {
                 OutputStream outputStream = con.getOutputStream();
                 outputStream.write(sendBytes);
             }
-            Log.e("Response2",url);
             httpResponse = con.getResponseCode();
             InputStream inputStream;
             Scanner scanner;
