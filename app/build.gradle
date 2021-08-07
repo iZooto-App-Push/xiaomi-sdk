@@ -7,11 +7,11 @@ android {
         applicationId "com.app.izoototest"
         minSdkVersion 18
         targetSdkVersion 30
-        versionCode 4
-        versionName "1.0.3"
+        versionCode 6
+        versionName "1.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
-                izooto_app_id: "09f06385e06cc10d0fc7a5e1c002cd9338a2c94f"//"b7d70ad86cbd3664ec38d8a7c294bfd6452cf5e8"//"a93348eba04f75f86a4d07e3eb88e6f9740bec6a"
+                izooto_app_id: "a93348eba04f75f86a4d07e3eb88e6f9740bec6a"//"b7d70ad86cbd3664ec38d8a7c294bfd6452cf5e8"//"a93348eba04f75f86a4d07e3eb88e6f9740bec6a"
         ]
     }
 

@@ -8,11 +8,16 @@ import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 
 import com.izooto.NotificationHelperListener;
 import com.izooto.Payload;
 import com.izooto.TokenReceivedListener;
 import com.izooto.iZooto;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements NotificationHelperListener, TokenReceivedListener
@@ -24,14 +29,14 @@ public class MainActivity extends AppCompatActivity implements NotificationHelpe
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-
-
+        HashMap<String,Object> data= new HashMap<>();
+        data.put("Language","Punjabi");
+      //  iZooto.addEvent("Xiaomi",data);
+      //  iZooto.addUserProperty(data);
+//        List<String> topicNale=new ArrayList<>();
+//        topicNale.add("DOB");
+//        iZooto.addTag(topicNale);
     }
-
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);

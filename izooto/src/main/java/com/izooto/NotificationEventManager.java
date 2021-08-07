@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.service.notification.StatusBarNotification;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -38,7 +39,10 @@ import java.net.URLEncoder;
 import java.nio.file.WatchEvent;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class NotificationEventManager {
     private static Bitmap notificationIcon, notificationBanner;//,act1Icon,act2Icon;
@@ -64,117 +68,110 @@ public class NotificationEventManager {
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private static void allAdPush(Payload payload) {
-        try
-        {
-            PreferenceUtil preferenceUtil =PreferenceUtil.getInstance(iZooto.appContext);
-            if(preferenceUtil.getIntData("Counter")==1)
-            {
-                if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
-                    showNotification(payload);
-                } else {
-                    processPayload(payload);
-                }
-            }
-            else
-            {
-                try
-                {
-                    String data = preferenceUtil.getStringData(AppConstant.NOTIFICATION_DUPLICATE);
-                    JSONObject jsonObject = new JSONObject();
-                    if (!data.isEmpty()) {
-                        JSONArray jsonArray1 = new JSONArray(data);
-                        if (jsonArray1.length() > 150) {
-                            long currentTime = System.currentTimeMillis(); //fetch start time
-                            for (int i = 0; i < jsonArray1.length(); i++) {
-                                JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
-                                if ((currentTime - (Long.parseLong(jsonObject2.getString(AppConstant.CHECK_CREATED_ON)))) > Long.parseLong(payload.getTime_to_live())) {
-                                    jsonArray1.remove(i);
-                                } else {
-                                    if (i < 10) {
-                                        jsonArray1.remove(i);
-                                    }
-                                }
-                            }
-                            preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
-                        } else {
-                            if (jsonArray1.length() > 0) {
-                                for (int index = 0; index < jsonArray1.length(); index++) {
-                                    JSONObject jsonObject1 = jsonArray1.getJSONObject(index);
-                                    if (jsonObject1.getString(AppConstant.CHECK_CREATED_ON).equalsIgnoreCase(payload.getCreated_Time()) && jsonObject1.getString(AppConstant.CHECK_RID).equalsIgnoreCase(payload.getRid())) {
-                                        isCheck = true;
-                                        if (jsonObject1.getString(AppConstant.Check_Notification).equalsIgnoreCase(AppConstant.YES)) {
-                                            jsonArray1.remove(index);
-                                        } else {
-                                            jsonArray1.remove(index);
-                                            jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
-                                            jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
-                                            jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
-                                            jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_YES);
-                                            jsonArray1.put(jsonObject);
-                                        }
-                                        break;
-                                    } else {
-                                        isCheck = false;
-                                    }
-                                }
+      if(iZooto.appContext!=null) {
+          try {
+              PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+              if (preferenceUtil.getIntData(AppConstant.CLOUD_PUSH) == 1) {
+                  if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                      showNotification(payload);
+                  } else {
+                      processPayload(payload);
+                  }
+              } else {
+                  try {
+                      String data = preferenceUtil.getStringData(AppConstant.NOTIFICATION_DUPLICATE);
+                      JSONObject jsonObject = new JSONObject();
+                      if (!data.isEmpty()) {
+                          JSONArray jsonArray1 = new JSONArray(data);
+                          if (jsonArray1.length() > 150) {
+                              long currentTime = System.currentTimeMillis(); //fetch start time
+                              for (int i = 0; i < jsonArray1.length(); i++) {
+                                  JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
+                                  if ((currentTime - (Long.parseLong(jsonObject2.getString(AppConstant.CHECK_CREATED_ON)))) > Long.parseLong(payload.getTime_to_live())) {
+                                      jsonArray1.remove(i);
+                                  } else {
+                                      if (i < 10) {
+                                          jsonArray1.remove(i);
+                                      }
+                                  }
+                              }
+                              preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+                          } else {
+                              if (jsonArray1.length() > 0) {
+                                  for (int index = 0; index < jsonArray1.length(); index++) {
+                                      JSONObject jsonObject1 = jsonArray1.getJSONObject(index);
+                                      if (jsonObject1.getString(AppConstant.CHECK_CREATED_ON).equalsIgnoreCase(payload.getCreated_Time()) && jsonObject1.getString(AppConstant.CHECK_RID).equalsIgnoreCase(payload.getRid())) {
+                                          isCheck = true;
+                                          if (jsonObject1.getString(AppConstant.Check_Notification).equalsIgnoreCase(AppConstant.YES)) {
+                                              jsonArray1.remove(index);
+                                          } else {
+                                              jsonArray1.remove(index);
+                                              jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                              jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                              jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                              jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_YES);
+                                              jsonArray1.put(jsonObject);
+                                          }
+                                          break;
+                                      } else {
+                                          isCheck = false;
+                                      }
+                                  }
 
-                                if (isCheck) {
-                                    preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+                                  if (isCheck) {
+                                      preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
 
-                                } else {
-                                    if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
-                                        showNotification(payload);
-                                    } else {
-                                        processPayload(payload);
-                                    }
-                                    jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
-                                    jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
-                                    jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
-                                    jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
-                                    jsonArray1.put(jsonObject);
-                                    preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
-                                }
-                            } else {
-                                jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
-                                jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
-                                jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
-                                jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
-                                jsonArray1.put(jsonObject);
-                                preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
-                                if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
-                                    showNotification(payload);
-                                } else {
-                                    processPayload(payload);
-                                }
-                            }
-                        }
-                    } else {
-                        JSONArray jsonArray = new JSONArray();
-                        jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
-                        jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
-                        jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
-                        jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
-                        jsonArray.put(jsonObject);
-                        preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
-                        if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
-                            showNotification(payload);
-                        } else {
-                            processPayload(payload);
-                        }
-                        preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
-                    }
-                }
-                catch (Exception ex)
-                {
-                  Log.v("AdException",ex.toString());
-                }
+                                  } else {
+                                      if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                                          showNotification(payload);
+                                      } else {
+                                          processPayload(payload);
+                                      }
+                                      jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                      jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                      jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                      jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
+                                      jsonArray1.put(jsonObject);
+                                      preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+                                  }
+                              } else {
+                                  jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                  jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                  jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                  jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
+                                  jsonArray1.put(jsonObject);
+                                  preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+                                  if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                                      showNotification(payload);
+                                  } else {
+                                      processPayload(payload);
+                                  }
+                              }
+                          }
+                      } else {
+                          JSONArray jsonArray = new JSONArray();
+                          jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                          jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                          jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                          jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
+                          jsonArray.put(jsonObject);
+                          preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
+                          if (preferenceUtil.getBoolean(AppConstant.MEDIATION)) {
+                              showNotification(payload);
+                          } else {
+                              processPayload(payload);
+                          }
+                          preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
+                      }
+                  } catch (Exception ex) {
+                      Log.v("AdException", ex.toString());
+                  }
 
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.v("AdPush",ex.toString());
-        }
+              }
+          } catch (Exception ex) {
+              Log.v("AdPush", ex.toString());
+          }
+      }
 
     }
 
@@ -183,70 +180,59 @@ public class NotificationEventManager {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private static void allCloudPush(Payload payload)
     {
-        PreferenceUtil preferenceUtil =PreferenceUtil.getInstance(iZooto.appContext);
-        try {
-                   if(preferenceUtil.getIntData("Counter")==1)
-                   {
-                       showNotification(payload);
+       if(iZooto.appContext!=null) {
+           PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+           try {
+               if (preferenceUtil.getIntData(AppConstant.CLOUD_PUSH) == 1) {
+                   showNotification(payload);
 
-                   }
-                   else {
+               } else {
 
-                       String data = preferenceUtil.getStringData(AppConstant.NOTIFICATION_DUPLICATE);
-                       JSONObject jsonObject = new JSONObject();
-                       if (!data.isEmpty()) {
-                           JSONArray jsonArray1 = new JSONArray(data);
-                           if (jsonArray1.length() > 150) {
-                               long currentTime = System.currentTimeMillis(); //fetch start time
-                               for (int i = 0; i < jsonArray1.length(); i++) {
-                                   JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
-                                   if ((currentTime - (Long.parseLong(jsonObject2.getString(AppConstant.CHECK_CREATED_ON)))) > Long.parseLong(payload.getTime_to_live())) {
+                   String data = preferenceUtil.getStringData(AppConstant.NOTIFICATION_DUPLICATE);
+                   JSONObject jsonObject = new JSONObject();
+                   if (!data.isEmpty()) {
+                       JSONArray jsonArray1 = new JSONArray(data);
+                       if (jsonArray1.length() > 150) {
+                           long currentTime = System.currentTimeMillis(); //fetch start time
+                           for (int i = 0; i < jsonArray1.length(); i++) {
+                               JSONObject jsonObject2 = jsonArray1.getJSONObject(i);
+                               if ((currentTime - (Long.parseLong(jsonObject2.getString(AppConstant.CHECK_CREATED_ON)))) > Long.parseLong(payload.getTime_to_live())) {
+                                   jsonArray1.remove(i);
+                               } else {
+                                   if (i < 10) {
                                        jsonArray1.remove(i);
-                                   } else {
-                                       if (i < 10) {
-                                           jsonArray1.remove(i);
-                                       }
                                    }
                                }
-                               preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+                           }
+                           preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
 
-                           } else {
-                               if (jsonArray1.length() > 0) {
-                                   for (int index = 0; index < jsonArray1.length(); index++) {
-                                       JSONObject jsonObject1 = jsonArray1.getJSONObject(index);
-                                       if (jsonObject1.getString(AppConstant.CHECK_CREATED_ON).equalsIgnoreCase(payload.getCreated_Time()) && jsonObject1.getString(AppConstant.CHECK_RID).equalsIgnoreCase(payload.getRid())) {
+                       } else {
+                           if (jsonArray1.length() > 0) {
+                               for (int index = 0; index < jsonArray1.length(); index++) {
+                                   JSONObject jsonObject1 = jsonArray1.getJSONObject(index);
+                                   if (jsonObject1.getString(AppConstant.CHECK_CREATED_ON).equalsIgnoreCase(payload.getCreated_Time()) && jsonObject1.getString(AppConstant.CHECK_RID).equalsIgnoreCase(payload.getRid())) {
 
-                                           isCheck = true;
-                                           if (jsonObject1.getString(AppConstant.Check_Notification).equalsIgnoreCase(AppConstant.YES)) {
-                                               jsonArray1.remove(index);
+                                       isCheck = true;
+                                       if (jsonObject1.getString(AppConstant.Check_Notification).equalsIgnoreCase(AppConstant.YES)) {
+                                           jsonArray1.remove(index);
 
-                                           } else {
-                                               jsonArray1.remove(index);
-                                               jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
-                                               jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
-                                               jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
-                                               jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_YES);
-                                               jsonArray1.put(jsonObject);
-                                           }
-                                           break;
                                        } else {
-                                           isCheck = false;
+                                           jsonArray1.remove(index);
+                                           jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                                           jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                                           jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                                           jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_YES);
+                                           jsonArray1.put(jsonObject);
                                        }
-
-                                   }
-                                   if (isCheck) {
-                                       preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
-
+                                       break;
                                    } else {
-                                       showNotification(payload);
-                                       jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
-                                       jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
-                                       jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
-                                       jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
-                                       jsonArray1.put(jsonObject);
-                                       preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
-
+                                       isCheck = false;
                                    }
+
+                               }
+                               if (isCheck) {
+                                   preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+
                                } else {
                                    showNotification(payload);
                                    jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
@@ -257,27 +243,36 @@ public class NotificationEventManager {
                                    preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
 
                                }
+                           } else {
+                               showNotification(payload);
+                               jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                               jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                               jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                               jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
+                               jsonArray1.put(jsonObject);
+                               preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray1.toString());
+
                            }
-
-                       } else {
-                           JSONArray jsonArray = new JSONArray();
-                           jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
-                           jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
-                           jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
-                           jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
-                           jsonArray.put(jsonObject);
-                           preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
-                           showNotification(payload);
                        }
+
+                   } else {
+                       JSONArray jsonArray = new JSONArray();
+                       jsonObject.put(AppConstant.CHECK_CREATED_ON, payload.getCreated_Time());
+                       jsonObject.put(AppConstant.CHECK_RID, payload.getRid());
+                       jsonObject.put(AppConstant.CHECK_TTL, payload.getTime_to_live());
+                       jsonObject.put(AppConstant.Check_Notification, AppConstant.Check_NO);
+                       jsonArray.put(jsonObject);
+                       preferenceUtil.setStringData(AppConstant.NOTIFICATION_DUPLICATE, jsonArray.toString());
+                       showNotification(payload);
                    }
+               }
 
 
-        }
-        catch(Exception ex)
-        {
-            Log.v("Data", "0" + ex.toString());
+           } catch (Exception ex) {
+               Log.v("Data", "0" + ex.toString());
 
-        }
+           }
+       }
 
     }
 
@@ -646,6 +641,8 @@ public class NotificationEventManager {
                     }
 
                     iZooto.notificationView(payload);
+                    if (payload.getMaxNotification() != 0){
+                        getMaximumNotificationInTray(iZooto.appContext, payload.getMaxNotification());}
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -974,6 +971,9 @@ public class NotificationEventManager {
                     }
                     iZooto.notificationView(payload);
 
+                    if (payload.getMaxNotification() != 0){
+                        getMaximumNotificationInTray(iZooto.appContext, payload.getMaxNotification());}
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1009,16 +1009,18 @@ public class NotificationEventManager {
         });
     }
 
-    private static boolean isInt(String s)//1234
-    {
-        try
-        {
-            Integer.parseInt(s);//1234//what is use case variable i // Number format exception check kiya tha
-            return true;
-        }
+    public static boolean isInt(String s) {
+        if (s.isEmpty())
+            return false;
 
-        catch(NumberFormatException er)
-        {
+        if(!s.matches("-?\\d+"))
+            return false;
+
+        try {
+            Integer.parseInt(s); //1234//what is use case variable i // Number format exception check kiya tha
+            return true;
+        } catch(NumberFormatException er) {
+            Util.setException(iZooto.appContext, er.toString(), "isInt", AppConstant.APPName_2);
             return false;
         }
 
@@ -1186,6 +1188,7 @@ public class NotificationEventManager {
                         }
                         iZooto.notificationView(payload);
 
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -1239,29 +1242,40 @@ public class NotificationEventManager {
     }
 
     private static void impressionNotificationApi(final Payload payload){
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
-        String imprURL;
-        int dataCfg = Util.getBinaryToDecimal(payload.getCfg());
-        if (dataCfg > 0){
-            imprURL = "https://impr" + dataCfg + ".izooto.com/imp" + dataCfg;
-        }else
-            imprURL = RestClient.IMPRESSION_URL;
-        String api_url = AppConstant.API_PID +  preferenceUtil.getiZootoID(AppConstant.APPPID) +
-                AppConstant.CID_ + payload.getId() + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.RID_ + payload.getRid() + "&op=view"+AppConstant.PUSH_TYPE+payload.getPush_type();;
-        RestClient.postRequest(imprURL + api_url, new RestClient.ResponseHandler() {
-            @Override
-            void onFailure(int statusCode, String response, Throwable throwable) {
-                super.onFailure(statusCode, response, throwable);
-            }
+        if(iZooto.appContext!=null) {
 
-            @Override
-            void onSuccess(String response) {
-                super.onSuccess(response);
-                if (payload != null)
-                    Log.e("imp","call");
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+            String imprURL;
+            int dataCfg = Util.getBinaryToDecimal(payload.getCfg());
+            if (dataCfg > 0) {
+                imprURL = "https://impr" + dataCfg + ".izooto.com/imp" + dataCfg;
+            } else
+                imprURL = RestClient.IMPRESSION_URL;
 
+            try {
+                HashMap<String, String> data = new HashMap<>();
+                data.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                data.put(AppConstant.CID_, payload.getId());
+                data.put(AppConstant.ANDROID_ID, Util.getAndroidId(iZooto.appContext));
+                data.put(AppConstant.RID, payload.getRid());
+                data.put("op", "view");
+                data.put("ct", payload.getPush_type());
+                RestClient.newPostRequest(imprURL, data, new RestClient.ResponseHandler() {
+                    @Override
+                    void onFailure(int statusCode, String response, Throwable throwable) {
+                        super.onFailure(statusCode, response, throwable);
+                    }
+
+                    @Override
+                    void onSuccess(String response) {
+                        super.onSuccess(response);
+                    }
+                });
+
+            } catch (Exception ex) {
+                Util.setException(iZooto.appContext, ex.toString(), AppConstant.APPName_2, "viewNotificationAPi");
             }
-        });
+        }
     }
     private static int getBadgeColor(String setColor){
         int iconColor;
@@ -1368,40 +1382,78 @@ public class NotificationEventManager {
     }
 
     private static void lastViewNotification(final Payload payload){
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
-        String encodeData = "";
-        try {
-            HashMap<String, Object> data = new HashMap<>();
-            data.put(AppConstant.LAST_NOTIFICAION_VIEWED, true);
-            JSONObject jsonObject = new JSONObject(data);
-            encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if(iZooto.appContext!=null) {
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
+            String encodeData = "";
+            try {
+                HashMap<String, Object> data = new HashMap<>();
+                data.put(AppConstant.LAST_NOTIFICAION_VIEWED, true);
+                JSONObject jsonObject = new JSONObject(data);
+                encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
+
+                String limURL;
+                int dataCfg = Util.getBinaryToDecimal(payload.getCfg());
+
+                if (dataCfg > 0) {
+                    limURL = "https://lim" + dataCfg + ".izooto.com/lim" + dataCfg;
+                } else
+                    limURL = RestClient.LASTNOTIFICATIONVIEWURL;
+
+                Map<String, String> mapData = new HashMap<>();
+                mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                mapData.put(AppConstant.VER_, AppConstant.SDKVERSION);
+                mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(iZooto.appContext));
+                mapData.put(AppConstant.VAL, "" + encodeData);
+                mapData.put(AppConstant.ACT, "add");
+                mapData.put(AppConstant.ISID_, "1");
+                mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);
+                RestClient.newPostRequest(limURL, mapData, new RestClient.ResponseHandler() {
+                    @Override
+                    void onSuccess(final String response) {
+                        super.onSuccess(response);
+                    }
+
+                    @Override
+                    void onFailure(int statusCode, String response, Throwable throwable) {
+                        super.onFailure(statusCode, response, throwable);
+                    }
+                });
+            } catch (Exception ex) {
+                Util.setException(iZooto.appContext, ex.toString(), AppConstant.APPName_2, "lastViewNotification");
+            }
         }
-        String limURL;
-        int dataCfg = Util.getBinaryToDecimal(payload.getCfg());
-
-        if (dataCfg > 0){
-            limURL = "https://lim"+ dataCfg + ".izooto.com/lim" + dataCfg;
-        }else
-            limURL = RestClient.LASTNOTIFICATIONVIEWURL;
-
-        String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.VER_ + Util.getSDKVersion(iZooto.appContext) +
-                AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext) + AppConstant.VAL + encodeData + AppConstant.ACT + "add" + AppConstant.ISID_ + "1" + AppConstant.ET_ + "userp";
-        RestClient.postRequest(limURL + api_url, new RestClient.ResponseHandler() {
-            @Override
-            void onFailure(int statusCode, String response, Throwable throwable) {
-                super.onFailure(statusCode, response, throwable);
-            }
-
-            @Override
-            void onSuccess(String response) {
-                super.onSuccess(response);
-                Log.v("l", "c");
-
-            }
-        });
     }
 
+    /*
+     *Set Maximum notification in the tray through getMaximumNotificationInTray() method
+     * */
+    public static void getMaximumNotificationInTray(Context context, int mn){
+        if(context!=null) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    NotificationManager notificationManagerActive =
+                            (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    StatusBarNotification[] notifications = notificationManagerActive.getActiveNotifications();
+                    SortedMap<Long, Integer> activeNotifIds = new TreeMap<>();
+                    for (StatusBarNotification notification : notifications) {
+                        if (notification.getTag() == null) {
+                            activeNotifIds.put(notification.getNotification().when, notification.getId());
+                        }
+                    }
+                    int data = activeNotifIds.size() - mn;
+                    for (Map.Entry<Long, Integer> mapData : activeNotifIds.entrySet()) {
+                        if (data <= 0)
+                            return;
+                        data--;
+                        NotificationManager notificationManager =
+                                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                        notificationManager.cancel(mapData.getValue());
+                    }
+                }
+            } catch (Exception e) {
+                Util.setException(context, e.toString(), AppConstant.APPName_2, "MaxNotification in Tray");
+            }
+        }
+    }
 
 }

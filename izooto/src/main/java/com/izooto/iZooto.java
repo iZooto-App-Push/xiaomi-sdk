@@ -102,34 +102,45 @@ public class iZooto {
                         @Override
                         void onSuccess(String response) {
                             super.onSuccess(response);
-                            try {
-                                final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-                                JSONObject jsonObject = new JSONObject(Objects.requireNonNull(Util.decrypt(AppConstant.SECRETKEY, response)));
-                                senderId =jsonObject.getString(AppConstant.SENDERID);
-                                String appId = jsonObject.optString(AppConstant.APPID);
-                                String apiKey = jsonObject.optString(AppConstant.APIKEY);
-                                String mKey=jsonObject.optString(AppConstant.MIAPIKEY);
-                                String mId=jsonObject.optString(AppConstant.MIAPPID);
-                                String hms_appId=jsonObject.optString(AppConstant.HMS_APP_ID);
-                                mIzooToAppId = jsonObject.optString(AppConstant.APPPID);
-                                preferenceUtil.setiZootoID(AppConstant.APPPID,mIzooToAppId);
-                                trackAdvertisingId();
-                                if(!mKey.isEmpty() && !mId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Xiaomi"))
-                                {
-                                    XiaomiSDKHandler xiaomiSDKHandler =new XiaomiSDKHandler(iZooto.appContext,mId,mKey);
-                                    xiaomiSDKHandler.onMIToken();
+                            if (!response.isEmpty() && response.length() > 20 && response != null) {
+                                try {
+                                    final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+                                    JSONObject jsonObject = new JSONObject(Objects.requireNonNull(Util.decrypt(AppConstant.SECRETKEY, response)));
+                                    senderId = jsonObject.getString(AppConstant.SENDERID);
+                                    String appId = jsonObject.optString(AppConstant.APPID);
+                                    String apiKey = jsonObject.optString(AppConstant.APIKEY);
+                                    String mKey = jsonObject.optString(AppConstant.MIAPIKEY);
+                                    String mId = jsonObject.optString(AppConstant.MIAPPID);
+                                    String hms_appId = jsonObject.optString(AppConstant.HMS_APP_ID);
+                                    mIzooToAppId = jsonObject.optString(AppConstant.APPPID);
+                                    preferenceUtil.setiZootoID(AppConstant.APPPID, mIzooToAppId);
+                                    trackAdvertisingId();
+                                    if (!mKey.isEmpty() && !mId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Xiaomi")) {
+                                        XiaomiSDKHandler xiaomiSDKHandler = new XiaomiSDKHandler(iZooto.appContext, mId, mKey);
+                                        xiaomiSDKHandler.onMIToken();
+                                    }
+                                    if (!hms_appId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Huawei"))
+                                        initHmsService(appContext);
+                                    if (senderId != null && !senderId.isEmpty()) {
+                                        init(context, apiKey, appId);
+                                    } else {
+                                        Lg.e(AppConstant.APP_NAME_TAG, appContext.getString(R.string.something_wrong_fcm_sender_id));
+                                    }
+                                    if (!preferenceUtil.getStringData(AppConstant.USER_LOCAL_DATA).isEmpty()) {
+                                        JSONObject json  = new JSONObject(preferenceUtil.getStringData(AppConstant.USER_LOCAL_DATA));
+                                        addUserProperty(Util.toMap(json));
+                                    }
+                                } catch (JSONException e) {
+                                    Lg.e(AppConstant.APP_NAME_TAG, e.toString());
                                 }
-                                if (!hms_appId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Huawei"))
-                                    initHmsService(appContext);
-                                if (senderId != null && !senderId.isEmpty()) {
-                                    init(context, apiKey, appId);
-                                } else {
-                                    Lg.e(AppConstant.APP_NAME_TAG, appContext.getString(R.string.something_wrong_fcm_sender_id));
-                                }
-                            } catch (JSONException e) {
-                                Lg.e(AppConstant.APP_NAME_TAG,e.toString());
+                            }
+                            else
+                            {
+                              Log.e(AppConstant.APP_NAME_TAG,"Account id is not sync properly on panel");
                             }
                         }
+
+
                     });
                 }
             } else {
@@ -140,6 +151,7 @@ public class iZooto {
         } catch (Throwable t) {
             t.printStackTrace();
         }
+
     }
     private static void initHmsService(final Context context){
         HMSTokenGenerator hmsTokenGenerator = new HMSTokenGenerator();
@@ -168,7 +180,6 @@ public class iZooto {
                     registerToken();
                     if (iZooto.isHybrid)
                         preferenceUtil.setBooleanData(AppConstant.IS_HYBRID_SDK, iZooto.isHybrid);
-                    lastVisitApi(appContext);
                     ActivityLifecycleListener.registerActivity((Application)appContext);
                     setCurActivity(context);
                     areNotificationsEnabledForSubscribedState(appContext);
@@ -187,21 +198,23 @@ public class iZooto {
     }
 
     private static void trackAdvertisingId(){
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-        AdvertisingIdClient.getAdvertisingId(appContext, new AdvertisingIdClient.Listener() {
-            @Override
-            public void onAdvertisingIdClientFinish(AdvertisingIdClient.AdInfo adInfo) {
-                advertisementID = adInfo.getId();
-                preferenceUtil.setStringData(AppConstant.ADVERTISING_ID,advertisementID);
-                invokeFinish(advertisementID,preferenceUtil.getStringData(AppConstant.ENCRYPTED_PID));
+        if(appContext!=null) {
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+            AdvertisingIdClient.getAdvertisingId(appContext, new AdvertisingIdClient.Listener() {
+                @Override
+                public void onAdvertisingIdClientFinish(AdvertisingIdClient.AdInfo adInfo) {
+                    advertisementID = adInfo.getId();
+                    preferenceUtil.setStringData(AppConstant.ADVERTISING_ID, advertisementID);
+                    invokeFinish(advertisementID, preferenceUtil.getStringData(AppConstant.ENCRYPTED_PID));
 
-            }
+                }
 
-            @Override
-            public void onAdvertisingIdClientFail(Exception exception) {
-                invokeFail(new Exception(TAG + " - Error: context null"));
-            }
-        });
+                @Override
+                public void onAdvertisingIdClientFail(Exception exception) {
+                    invokeFail(new Exception(TAG + " - Error: context null"));
+                }
+            });
+        }
     }
 
     public static synchronized void idsAvailable(Context context, Listener listener) {
@@ -263,70 +276,84 @@ public class iZooto {
             }
         });
     }
-
-    private static void registerToken() {
-        Util.sleepTime(10000);
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+private static void registerToken() {
+    if(appContext!=null) {
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
         if (!preferenceUtil.getBoolean(AppConstant.IS_TOKEN_UPDATED) || !preferenceUtil.getStringData(AppConstant.HMS_TOKEN).isEmpty()) {
-            String api_url = AppConstant.ADDURL + AppConstant.STYPE + AppConstant.PID + mIzooToAppId + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.TIMEZONE + System.currentTimeMillis() + AppConstant.APPVERSION + Util.getSDKVersion(iZooto.appContext) +
-                    AppConstant.OS + AppConstant.SDKOS + AppConstant.ALLOWED_ + AppConstant.ALLOWED + AppConstant.ANDROID_ID + Util.getAndroidId(appContext) + AppConstant.CHECKSDKVERSION +Util.getSDKVersion(iZooto.appContext)+AppConstant.LANGUAGE+Util.getDeviceLanguage() +AppConstant.QSDK_VERSION +AppConstant.SDKVERSION+
-                    AppConstant.TOKEN +preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN) + AppConstant.ADVERTISEMENTID +preferenceUtil.getStringData(AppConstant.ADVERTISING_ID)+AppConstant.XIAOMITOKEN+preferenceUtil.getStringData(AppConstant.XiaomiToken)+ AppConstant.PACKAGE_NAME+appContext.getPackageName()+AppConstant.SDKTYPE+SDKDEF
-                    +AppConstant.KEY_HMS+ preferenceUtil.getStringData(AppConstant.HMS_TOKEN);
+            if (!preferenceUtil.getStringData(AppConstant.HMS_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty()) {
+                preferenceUtil.setIntData(AppConstant.CLOUD_PUSH, 3);
+            } else if (!preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty()) {
+                preferenceUtil.setIntData(AppConstant.CLOUD_PUSH, 2);
+            } else {
+                preferenceUtil.setIntData(AppConstant.CLOUD_PUSH, 1);
+            }
             try {
-                String deviceName = URLEncoder.encode(Util.getDeviceName(), AppConstant.UTF);
-                String osVersion = URLEncoder.encode(Build.VERSION.RELEASE, AppConstant.UTF);
-                api_url += AppConstant.ANDROIDVERSION + osVersion + AppConstant.DEVICENAME + deviceName;
-            } catch (UnsupportedEncodingException e) {
-                Lg.e(AppConstant.APP_NAME_TAG, AppConstant.UNEXCEPTION);
-            }
-            if(!preferenceUtil.getStringData(AppConstant.HMS_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty())
-            {
-                preferenceUtil.setIntData("Counter",3);
-            }
-           else if(!preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty())
-            {
-                preferenceUtil.setIntData("Counter",2);
-            }
-           else
-            {
-                preferenceUtil.setIntData("Counter",1);
-
-            }
-            RestClient.postRequest(api_url, new RestClient.ResponseHandler() {
-                @Override
-                void onSuccess(final String response) {
-                    super.onSuccess(response);
-                    if (mBuilder != null && mBuilder.mTokenReceivedListener != null) {
-                        new Handler(Looper.getMainLooper()).post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mBuilder.mTokenReceivedListener.onTokenReceived(preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
-                            }
-                        });
-
+                Map<String, String> mapData = new HashMap<>();
+                mapData.put(AppConstant.ADDURL, "" + AppConstant.STYPE);
+                mapData.put(AppConstant.PID, mIzooToAppId);
+                mapData.put(AppConstant.BTYPE_, "" + AppConstant.BTYPE);
+                mapData.put(AppConstant.DTYPE_, "" + AppConstant.DTYPE);
+                mapData.put(AppConstant.TIMEZONE, "" + System.currentTimeMillis());
+                mapData.put(AppConstant.APPVERSION, "" + Util.getSDKVersion(iZooto.appContext));
+                mapData.put(AppConstant.OS, "" + AppConstant.SDKOS);
+                mapData.put(AppConstant.ALLOWED_, "" + AppConstant.ALLOWED);
+                mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
+                mapData.put(AppConstant.CHECKSDKVERSION, "" + Util.getSDKVersion(appContext));
+                mapData.put(AppConstant.LANGUAGE, "" + Util.getDeviceLanguage());
+                mapData.put(AppConstant.QSDK_VERSION, "" + AppConstant.SDKVERSION);
+                mapData.put(AppConstant.TOKEN, "" + preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+                mapData.put(AppConstant.ADVERTISEMENTID, "" + preferenceUtil.getStringData(AppConstant.ADVERTISING_ID));
+                mapData.put(AppConstant.XIAOMITOKEN, "" + preferenceUtil.getStringData(AppConstant.XiaomiToken));
+                mapData.put(AppConstant.PACKAGE_NAME, "" + appContext.getPackageName());
+                mapData.put(AppConstant.SDKTYPE, "" + SDKDEF);
+                mapData.put(AppConstant.KEY_HMS, "" + preferenceUtil.getStringData(AppConstant.HMS_TOKEN));
+                try {
+                    String deviceName = URLEncoder.encode(Util.getDeviceName(), AppConstant.UTF);
+                    String osVersion = URLEncoder.encode(Build.VERSION.RELEASE, AppConstant.UTF);
+                    mapData.put(AppConstant.ANDROIDVERSION, "" + osVersion);
+                    mapData.put(AppConstant.DEVICENAME, "" + deviceName);
+                } catch (UnsupportedEncodingException e) {
+                    Lg.e(AppConstant.APP_NAME_TAG, AppConstant.UNEXCEPTION);
+                }
+                RestClient.newPostRequest(RestClient.BASE_URL, mapData, new RestClient.ResponseHandler() {
+                    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+                    @Override
+                    void onSuccess(final String response) {
+                        super.onSuccess(response);
+                        lastVisitApi(appContext);
+                        if (mBuilder != null && mBuilder.mTokenReceivedListener != null) {
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mBuilder.mTokenReceivedListener.onTokenReceived(preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+                                }
+                            });
+                        }
+                        preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, true);
+                        preferenceUtil.setLongData(AppConstant.DEVICE_REGISTRATION_TIMESTAMP, System.currentTimeMillis());
                     }
 
-                    preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, true);
-                    preferenceUtil.setLongData(AppConstant.DEVICE_REGISTRATION_TIMESTAMP, System.currentTimeMillis());
-                }
+                    @Override
+                    void onFailure(int statusCode, String response, Throwable throwable) {
+                        super.onFailure(statusCode, response, throwable);
+                    }
+                });
 
-                @Override
-                void onFailure(int statusCode, String response, Throwable throwable) {
-                    super.onFailure(statusCode, response, throwable);
-
-                }
-            });
-
-        }
-        else
-        {
-            if(mBuilder!=null && mBuilder.mTokenReceivedListener!=null) {
+            } catch (Exception exception) {
+                Util.setException(appContext, exception.toString(), AppConstant.APP_NAME_TAG, "registerToken");
+            }
+        } else {
+            if (mBuilder != null && mBuilder.mTokenReceivedListener != null) {
                 mBuilder.mTokenReceivedListener.onTokenReceived(preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
             }
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                lastVisitApi(appContext);
+            }
         }
-
     }
+
+}
 
     static void onActivityResumed(Activity activity){
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
@@ -552,26 +579,35 @@ public class iZooto {
 
     private static void getNotificationAPI(Context context,int value){
 
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
-        String appVersion = Util.getSDKVersion(iZooto.appContext);
-        String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ANDROID_ID + Util.getAndroidId(appContext)
-                + AppConstant.BTYPE_+ AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.APPVERSION + appVersion + AppConstant.PTE_ + AppConstant.PTE +
-                AppConstant.OS +AppConstant.SDKOS  + AppConstant.PT_+ AppConstant.PT + AppConstant.GE_ + AppConstant.GE + AppConstant.ACTION + value;
-        RestClient.postRequest(RestClient.SUBSCRIPTION_API + api_url, new RestClient.ResponseHandler(){
-            @Override
-            void onFailure(int statusCode, String response, Throwable throwable) {
-                super.onFailure(statusCode, response, throwable);
+        if(context!=null) {
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
+            try {
+                Map<String, String> mapData = new HashMap<>();
+                mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
+                mapData.put(AppConstant.BTYPE_, "" + AppConstant.BTYPE);
+                mapData.put(AppConstant.DTYPE_, "" + AppConstant.DTYPE);
+                mapData.put(AppConstant.APPVERSION, "" + AppConstant.SDKVERSION);
+                mapData.put(AppConstant.PTE_, "" + AppConstant.PTE);
+                mapData.put(AppConstant.OS, "" + AppConstant.SDKOS);
+                mapData.put(AppConstant.PT_, "" + AppConstant.PT);
+                mapData.put(AppConstant.GE_, "" + AppConstant.GE);
+                mapData.put(AppConstant.ACTION, "" + value);
+                RestClient.newPostRequest(RestClient.SUBSCRIPTION_API, mapData, new RestClient.ResponseHandler() {
+                    @Override
+                    void onSuccess(final String response) {
+                        super.onSuccess(response);
+                    }
 
-
+                    @Override
+                    void onFailure(int statusCode, String response, Throwable throwable) {
+                        super.onFailure(statusCode, response, throwable);
+                    }
+                });
+            } catch (Exception ex) {
+                Util.setException(iZooto.appContext, ex.toString(), AppConstant.APP_NAME_TAG, "getNotificationAPI");
             }
-
-            @Override
-            void onSuccess(String response) {
-                super.onSuccess(response);
-
-            }
-        });
-
+        }
 
     }
 
@@ -600,35 +636,45 @@ public class iZooto {
         }
     }
     private static void addEventAPI(String eventName,HashMap<String,Object> data){
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-        String encodeData = "";
-        //validation
-        HashMap<String, Object> filterEventData = checkValidationEvent(data, 1);
-        if (filterEventData.size() > 0) {
-            try {
-                JSONObject jsonObject = new JSONObject(filterEventData);
-                encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+        if(appContext!=null) {
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+            String encodeData = "";
+            HashMap<String, Object> filterEventData = checkValidationEvent(data, 1);
+            if (filterEventData.size() > 0) {
+                try {
+                    JSONObject jsonObject = new JSONObject(filterEventData);
+                    encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty()) {
 
-            if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty()) {
-                String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ACT + eventName +
-                        AppConstant.ET_ + "evt" + AppConstant.ANDROID_ID + Util.getAndroidId(appContext) + AppConstant.VAL + encodeData;
-                RestClient.postRequest(RestClient.EVENT_URL + api_url, new RestClient.ResponseHandler() {
-                    @Override
-                    void onFailure(int statusCode, String response, Throwable throwable) {
-                        super.onFailure(statusCode, response, throwable);
+                    try {
+                        Map<String, String> mapData = new HashMap<>();
+                        mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                        mapData.put(AppConstant.ACT, eventName);
+                        mapData.put(AppConstant.ET_, "evt");
+                        mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
+                        mapData.put(AppConstant.VAL, "" + encodeData);
+                        RestClient.newPostRequest(RestClient.EVENT_URL, mapData, new RestClient.ResponseHandler() {
+                            @Override
+                            void onSuccess(final String response) {
+                                super.onSuccess(response);
+                            }
+
+                            @Override
+                            void onFailure(int statusCode, String response, Throwable throwable) {
+                                super.onFailure(statusCode, response, throwable);
+                            }
+                        });
+                    } catch (Exception ex) {
+                        Util.setException(iZooto.appContext, ex.toString(), AppConstant.APP_NAME_TAG, "addEventAPI");
                     }
 
-                    @Override
-                    void onSuccess(String response) {
-                        super.onSuccess(response);
-                    }
-                });
+                }
+            } else {
+                Log.v(AppConstant.APP_NAME_TAG, "Event length more than 32...");
             }
-        } else {
-            Log.v(AppConstant.APP_NAME_TAG, "Event length more than 32...");
         }
     }
 
@@ -651,44 +697,58 @@ public class iZooto {
         }
         return newList;
     }
-    public static void addUserProperty(HashMap<String, Object> object)
-    {
+    public static void addUserProperty(HashMap<String, Object> object) {
+        if (appContext == null)
+            return;
+
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
         String encodeData = "";
-        if (object != null&&object.size()>0) {
-            HashMap<String, Object>  newListUserProfile = new HashMap<String, Object>();
-            for (Map.Entry<String,Object> refineEntry : object.entrySet()) {
-                if (refineEntry.getKey()!=null&&!refineEntry.getKey().isEmpty()){
-                    String newKey = refineEntry.getKey().toLowerCase();
-                    newListUserProfile.put(newKey,refineEntry.getValue());
+
+        try {
+            if (object != null && object.size()>0) {
+                HashMap<String, Object>  newListUserProfile = new HashMap<String, Object>();
+                for (Map.Entry<String,Object> refineEntry : object.entrySet()) {
+                    if (refineEntry.getKey()!=null&&!refineEntry.getKey().isEmpty()){
+                        String newKey = refineEntry.getKey().toLowerCase();
+                        newListUserProfile.put(newKey,refineEntry.getValue());
+                    }
                 }
-            }
-            if (newListUserProfile.size()>0) {
-                HashMap<String, Object> filterUserPropertyData = checkValidationUserProfile(newListUserProfile, 1);
-                if (filterUserPropertyData.size() > 0) {
-                    try {
+                if (newListUserProfile.size()>0) {
+                    HashMap<String, Object> filterUserPropertyData = checkValidationUserProfile(newListUserProfile, 1);
+                    if (filterUserPropertyData.size() > 0) {
                         JSONObject jsonObject = new JSONObject(filterUserPropertyData);
                         encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty()) {
-                        String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ACT + "add" +
-                                AppConstant.ET_ + "userp" + AppConstant.ANDROID_ID + Util.getAndroidId(appContext) + AppConstant.VAL + encodeData;
-                        RestClient.postRequest(RestClient.PROPERTIES_URL + api_url, new RestClient.ResponseHandler() {
-                            @Override
-                            void onFailure(int statusCode, String response, Throwable throwable) {
-                                super.onFailure(statusCode, response, throwable);
-                            }
 
-                            @Override
-                            void onSuccess(String response) {
-                                super.onSuccess(response);
-                            }
-                        });
+                        if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() && Util.isNetworkAvailable(appContext)) {
+                            Map<String,String> mapData= new HashMap<>();
+                            mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                            mapData.put(AppConstant.ACT, "add");
+                            mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);
+                            mapData.put(AppConstant.ANDROID_ID,"" + Util.getAndroidId(appContext));
+                            mapData.put(AppConstant.VAL,"" + encodeData);
+
+                            RestClient.newPostRequest(RestClient.PROPERTIES_URL, mapData, new RestClient.ResponseHandler() {
+                                @Override
+                                void onSuccess(final String response) {
+                                    super.onSuccess(response);
+                                    Log.e("Response","Success PROPERTIES_URL");
+                                    preferenceUtil.setStringData(AppConstant.USER_LOCAL_DATA, null);
+                                }
+                                @Override
+                                void onFailure(int statusCode, String response, Throwable throwable) {
+                                    super.onFailure(statusCode, response, throwable);
+                                }
+                            });
+                        } else {
+                            Log.e("TAG", "addUserProperty: else"+ newListUserProfile );
+                            JSONObject jsonObjectLocal = new JSONObject(object);
+                            preferenceUtil.setStringData(AppConstant.USER_LOCAL_DATA, jsonObjectLocal.toString());
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            Util.setException(appContext, e.toString(), "addUserProperty", AppConstant.APP_NAME_TAG);
         }
     }
     public static void  setNotificationSound(String soundName)
@@ -741,34 +801,44 @@ public class iZooto {
     }
 
     public static void setSubscription(Boolean enable) {
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-        int value = 2;
-        if (enable != null) {
-            if (enable) {
-                value = 0;
+        if(appContext!=null) {
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+            int value = 2;
+            if (enable != null) {
+                if (enable) {
+                    value = 0;
+                }
+                try {
+                    Map<String, String> mapData = new HashMap<>();
+                    mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                    mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
+                    mapData.put(AppConstant.BTYPE_, "" + AppConstant.BTYPE);
+                    mapData.put(AppConstant.DTYPE_, "" + AppConstant.DTYPE);
+                    mapData.put(AppConstant.APPVERSION, "" + AppConstant.SDKVERSION);
+                    mapData.put(AppConstant.PTE_, "" + AppConstant.PTE);
+                    mapData.put(AppConstant.OS, "" + AppConstant.SDKOS);
+                    mapData.put(AppConstant.PT_, "" + AppConstant.PT);
+                    mapData.put(AppConstant.GE_, "" + AppConstant.GE);
+                    mapData.put(AppConstant.ACTION, "" + value);
+                    RestClient.newPostRequest(RestClient.SUBSCRIPTION_API, mapData, new RestClient.ResponseHandler() {
+                        @Override
+                        void onSuccess(final String response) {
+                            super.onSuccess(response);
+                        }
+
+                        @Override
+                        void onFailure(int statusCode, String response, Throwable throwable) {
+                            super.onFailure(statusCode, response, throwable);
+                        }
+                    });
+                } catch (Exception ex) {
+                    Util.setException(iZooto.appContext, ex.toString(), AppConstant.APP_NAME_TAG, "setSubscription");
+                }
             }
-            String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ANDROID_ID + Util.getAndroidId(iZooto.appContext)
-                    + AppConstant.BTYPE_ + AppConstant.BTYPE + AppConstant.DTYPE_ + AppConstant.DTYPE + AppConstant.APPVERSION + Util.getSDKVersion(iZooto.appContext) + AppConstant.PTE_ + AppConstant.PTE +
-                    AppConstant.OS + AppConstant.SDKOS + AppConstant.PT_ + AppConstant.PT + AppConstant.GE_ + AppConstant.GE + AppConstant.ACTION + value;
-            RestClient.postRequest(RestClient.SUBSCRIPTION_API + api_url, new RestClient.ResponseHandler() {
-                @Override
-                void onFailure(int statusCode, String response, Throwable throwable) {
-                    super.onFailure(statusCode, response, throwable);
-
-
-                }
-
-                @Override
-                void onSuccess(String response) {
-                    super.onSuccess(response);
-
-
-                }
-            });
-
         }
 
     }
+
 
     public static void setFirebaseAnalytics(boolean isSet){
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
@@ -783,7 +853,7 @@ public class iZooto {
 
             if(data.get(AppConstant.AD_NETWORK) !=null && data.get(AppConstant.GLOBAL)!=null)
             {
-                AdMediation.getAdJsonData(data);
+                AdMediation.getAdJsonData(context,data);
                 preferenceUtil.setBooleanData(AppConstant.MEDIATION,true);
 
             }
@@ -837,6 +907,8 @@ public class iZooto {
                     payload.setCfg(payloadObj.optInt(ShortpayloadConstant.CFG));
                     payload.setTime_to_live(payloadObj.optString(ShortpayloadConstant.TIME_TO_LIVE));
                     payload.setPush_type(AppConstant.PUSH_FCM);
+                    payload.setSound(payloadObj.optString(ShortpayloadConstant.NOTIFICATION_SOUND));
+                    payload.setMaxNotification(payloadObj.optInt(ShortpayloadConstant.MAX_NOTIFICATION));
                 } else
                     return;
 
@@ -940,32 +1012,43 @@ public class iZooto {
         }
     }
     private static void topicApi(String action, List<String> topic){
-        if (topic.size() > 0){
-            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-            if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty()) {
-                String encodeData = "";
-                try {
-                    HashMap<String, List<String>> data = new HashMap<>();
-                    data.put(AppConstant.TOPIC, topic);
-                    JSONObject jsonObject = new JSONObject(data);
-                    encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+        if(appContext!=null) {
+            if (topic.size() > 0) {
+                final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+                if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty()) {
+                    String encodeData = "";
+                    try {
+                        HashMap<String, List<String>> data = new HashMap<>();
+                        data.put(AppConstant.TOPIC, topic);
+                        JSONObject jsonObject = new JSONObject(data);
+                        encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    try {
+                        Map<String, String> mapData = new HashMap<>();
+                        mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                        mapData.put(AppConstant.ACT, action);
+                        mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);
+                        mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
+                        mapData.put(AppConstant.VAL, "" + encodeData);
+                        mapData.put(AppConstant.TOKEN, "" + preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+                        mapData.put(AppConstant.BTYPE_, "" + AppConstant.BTYPE);
+                        RestClient.newPostRequest(RestClient.PROPERTIES_URL, mapData, new RestClient.ResponseHandler() {
+                            @Override
+                            void onSuccess(final String response) {
+                                super.onSuccess(response);
+                            }
 
-                String api_url = AppConstant.API_PID + preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ACT + action +
-                        AppConstant.ET_ + "userp" + AppConstant.ANDROID_ID + Util.getAndroidId(appContext) + AppConstant.VAL + encodeData +
-                        AppConstant.TOKEN + preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN) + AppConstant.BTYPE_ + AppConstant.BTYPE;
-                RestClient.postRequest(RestClient.PROPERTIES_URL + api_url, new RestClient.ResponseHandler() {
-                    @Override
-                    void onFailure(int statusCode, String response, Throwable throwable) {
-                        super.onFailure(statusCode, response, throwable);
+                            @Override
+                            void onFailure(int statusCode, String response, Throwable throwable) {
+                                super.onFailure(statusCode, response, throwable);
+                            }
+                        });
+                    } catch (Exception ex) {
+                        Util.setException(iZooto.appContext, ex.toString(), AppConstant.APP_NAME_TAG, "topicAPI");
                     }
-                    @Override
-                    void onSuccess(String response) {
-                        super.onSuccess(response);
-                    }
-                });
+                }
             }
         }
     }
@@ -1016,41 +1099,50 @@ public class iZooto {
     }
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private static void lastVisitApi(Context context){
-        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-        String time = preferenceUtil.getStringData(AppConstant.CURRENT_DATE);
-        if (!time.equalsIgnoreCase(getTime())){
-            preferenceUtil.setStringData(AppConstant.CURRENT_DATE,getTime());
-            String encodeData = "";
-            try {
-                HashMap<String, Object> data = new HashMap<>();
-                data.put(AppConstant.LAST_WEBSITE_VISIT, true);
-                data.put(AppConstant.LANG_, Util.getDeviceLanguageTag());
-                JSONObject jsonObject = new JSONObject(data);
-                encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-            } catch (Exception ex) {
-                ex.printStackTrace();
+        if(context!=null) {
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
+            String time = preferenceUtil.getStringData(AppConstant.CURRENT_DATE);
+            if (!time.equalsIgnoreCase(getTime())) {
+                preferenceUtil.setStringData(AppConstant.CURRENT_DATE, getTime());
+                String encodeData = "";
+                try {
+                    HashMap<String, Object> data = new HashMap<>();
+                    data.put(AppConstant.LAST_WEBSITE_VISIT, true);
+                    data.put(AppConstant.LANG_, Util.getDeviceLanguageTag());
+                    JSONObject jsonObject = new JSONObject(data);
+                    encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                try {
+                    Map<String, String> mapData = new HashMap<>();
+                    mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
+                    mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
+                    mapData.put(AppConstant.VAL, "" + encodeData);
+                    mapData.put(AppConstant.ACT, "add");
+                    mapData.put(AppConstant.ISID_, "1");
+                    mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);
+                    RestClient.newPostRequest(RestClient.LASTVISITURL, mapData, new RestClient.ResponseHandler() {
+                        @Override
+                        void onSuccess(final String response) {
+                            super.onSuccess(response);
+                        }
+
+                        @Override
+                        void onFailure(int statusCode, String response, Throwable throwable) {
+                            super.onFailure(statusCode, response, throwable);
+                        }
+                    });
+                } catch (Exception ex) {
+                    Log.e("Exception ex", ex.toString());
+                    Util.setException(context, ex.toString(), AppConstant.APP_NAME_TAG, "lastVisitAPI");
+
+
+                }
             }
-
-            String api_url = AppConstant.API_PID +preferenceUtil.getiZootoID(AppConstant.APPPID) + AppConstant.ANDROID_ID +
-                    Util.getAndroidId(context) + AppConstant.VAL + encodeData + AppConstant.ACT + "add" + AppConstant.ISID_ + "1" + AppConstant.ET_ + "userp";
-            RestClient.postRequest(RestClient.LASTVISITURL + api_url, new RestClient.ResponseHandler() {
-
-
-                @Override
-                void onFailure(int statusCode, String response, Throwable throwable) {
-                    super.onFailure(statusCode, response, throwable);
-                }
-
-                @Override
-                void onSuccess(String response) {
-                    super.onSuccess(response);
-                    Log.v(" lv","l");
-
-                }
-            });
         }
     }
-
     private static String getTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
         String currentDate = sdf.format(new Date());

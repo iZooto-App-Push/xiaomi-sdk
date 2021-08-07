@@ -90,7 +90,15 @@ public class Payload {
     private String created_Time;
     private String time_to_live;
     private String push_type;
+    private int  maxNotification;
 
+    public int getMaxNotification() {
+        return maxNotification;
+    }
+
+    public void setMaxNotification(int maxNotification) {
+        this.maxNotification = maxNotification;
+    }
 
     //////////////////////////////////////////////
 

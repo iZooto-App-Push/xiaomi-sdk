@@ -7,27 +7,25 @@ public interface AppConstant {
     String FCM_DEVICE_TOKEN = "deviceToken";
     String IZOOTO_SENDER_ID_KEY = "izooto_sender_id";
     String GOOGLE_JSON_URL = "https://cdn.izooto.com/app/app_";  //old
-    //String GOOGLE_JSON_URL = "https://cdn.izooto.com/app/"; // new
     String SDKNAME = "IZOOTO";
-    // String SDKNAME = "MOMAGIC";
     String DEVICETOKEN="DEVICE TOKEN   ->  ";
     String UTF="UTF-8";
     String FCMDEFAULT="[DEFAULT]";
     String BROWSERKEYID="{BROWSERKEYID}";
     String PTE="2";
-    String ANDROIDVERSION = "&osVersion=";
-    String DEVICENAME ="&deviceName=";
-    String TOKEN="&at=";
-    String ADDURL="app.php?s=";
-    String  PID="&pid=";
-    String BTYPE_="&btype=";
-    String DTYPE_="&dtype=";
-    String TIMEZONE="&tz=";
-    String APPVERSION="&bver=";
-    String OS="&os=";
-    String ALLOWED_="&allowed=";
-    String CHECKSDKVERSION="&check=";
-    String LANGUAGE="&ln=";
+    String ANDROIDVERSION = "osVersion";
+    String DEVICENAME ="deviceName";
+    String TOKEN="at";
+    String ADDURL="s";
+    String  PID="pid";
+    String BTYPE_="btype";
+    String DTYPE_="dtype";
+    String TIMEZONE="tz";
+    String APPVERSION="bver";
+    String OS="os";
+    String ALLOWED_="allowed";
+    String CHECKSDKVERSION="check";
+    String LANGUAGE="ln";
     String CLICKINDEX= "clickIndex";
     String APPPID="pid";
     String ENCRYPTED_PID="encryptedPid";
@@ -79,17 +77,17 @@ public interface AppConstant {
     String FIREBASE_8to10AM = "8-10 AM";
     String FIREBASE_10to12PM = "10-12 PM";
     String API_PID = "?pid=";
-    String PTE_="&pte=";
-    String CID_="&cid=";
-    String RID_="&rid=";
-    String NOTIFICATION_OP="&op=";
-    String ACTION="&action=";
-    String PT_="&pt=";
+    String PTE_="pte";
+    String CID_="cid";
+    String RID_="rid";
+    String NOTIFICATION_OP="op";
+    String ACTION="action";
+    String PT_="pt";
     int PT = 0;
-    String GE_ ="&ge=";
-    String ET_ ="&et=";
-    String VAL ="&val=";
-    String ACT ="&act=";
+    String GE_ ="ge";
+    String ET_ ="et";
+    String VAL ="val";
+    String ACT ="act";
     String BUTTON_ID_1 ="button1ID";
     String BUTTON_TITLE_1 ="button1Title";
     String BUTTON_URL_1 ="button1URL";
@@ -247,11 +245,11 @@ public interface AppConstant {
     String ADD_TOPIC ="add_topic";
     String REMOVE_TOPIC ="remove_topic";
     String TOPIC ="topic";
-    String ANDROID_ID="&bKey=";
-    String ADVERTISEMENTID="&adid=";
-    String XIAOMITOKEN = "&mt=";
+    String ANDROID_ID="bKey";
+    String ADVERTISEMENTID="adid";
+    String XIAOMITOKEN = "mt";
     String XiaomiToken = "xiaomi_token";
-    String PACKAGE_NAME="&mpn=";
+    String PACKAGE_NAME="mpn";
     String MIAPIKEY = "Mi_api_key";
     String MIAPPID="Mi_app_id";
     String CHECK_PAYLOAD="Title";
@@ -263,8 +261,8 @@ public interface AppConstant {
     String LANG_= "lang";
     String CURRENT_DATE= "currentDate";
     String IS_LAUNCH_FIRST_TIME= "isLaunchFirstTime";
-    String VER_= "&ver=";
-    String ISID_= "&isid=";
+    String VER_= "ver";
+    String ISID_= "isid";
     String CHECK_MESSAGE="MESSAGE";
     String IS_HYBRID_SDK = "hybrid";
 
@@ -272,11 +270,11 @@ public interface AppConstant {
     String AD_NETWORK="an";
     String GLOBAL="g";
     String AD_TYPE="tp";
-    String SDKVERSION="1.0.4";
-    String QSDK_VERSION="&av=";
-    String SDKTYPE="&sn=";
+    String SDKVERSION="1.1.0";
+    String QSDK_VERSION="av";
+    String SDKTYPE="sn";
     String SDK="SDKVERSION";
-    String MEDIATION="Mediation";
+    String MEDIATION="iz_Mediation";
     String CHECK_CREATED_ON="CT";
     String CHECK_RID="RID";
     String CHECK_TTL="TTL";
@@ -286,7 +284,7 @@ public interface AppConstant {
     String CHECK_XIAOMI="Check";
     String HMS_TOKEN = "hms_token";
     String IS_UPDATED_HMS_TOKEN = "hms_token";
-    String KEY_HMS="&ht=";
+    String KEY_HMS="ht";
     String HMS_APP_ID="hms_app_id";
     String HMS="Huawei";
     String PUSH_HMS="hms";
@@ -305,6 +303,18 @@ public interface AppConstant {
     String CURRENT_DATE_CLICK = "currentDateClick";
     String CURRENT_DATE_CLICK_WEEKLY = "currentDateClickWeekly";
     String CURRENT_DATE_CLICK_DAILY = "currentDateClickDaily";
+    String CHARSET_="charset";
+    String UTF_="utf-8";
+    String CONTENT_L="Content-Length";
+    String USERP_="userp";
+    String EXCEPTION_ = "exceptionName";
+    String METHOD_NAME = "methodName";
+    String ClASS_NAME = "className";
+    String APPName_2="NotificationEventManager";
+    String APPName_3="NotificationActionManager";
+    String CLOUD_PUSH="iz_Counter";
+    String USER_LOCAL_DATA = "userLocalData";
+
 }
 
 

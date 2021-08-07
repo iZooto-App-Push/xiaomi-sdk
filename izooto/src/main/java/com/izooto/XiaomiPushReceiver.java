@@ -47,13 +47,11 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
     private void handleNow(Context context, String data) {
         Log.d(TAG, AppConstant.NOTIFICATIONRECEIVED);
         try {
-
                   PreferenceUtil preferenceUtil =PreferenceUtil.getInstance(context);
-
                     JSONObject payloadObj = new JSONObject(data);
                     if(payloadObj.has(AppConstant.AD_NETWORK) && payloadObj.has(AppConstant.GLOBAL))
                     {
-                       AdMediation.getAdNotificationData(payloadObj,AppConstant.PUSH_XIAOMI);
+                       AdMediation.getAdNotificationData(context,payloadObj,AppConstant.PUSH_XIAOMI);
                         preferenceUtil.setBooleanData(AppConstant.MEDIATION,true);
                     }
                     else {
@@ -105,6 +103,8 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
                             payload.setCfg(payloadObj.optInt(ShortpayloadConstant.CFG));
                             payload.setTime_to_live(payloadObj.optString(ShortpayloadConstant.TIME_TO_LIVE));
                             payload.setPush_type(AppConstant.PUSH_XIAOMI);
+                            payload.setSound(payloadObj.optString(ShortpayloadConstant.NOTIFICATION_SOUND));
+                            payload.setMaxNotification(payloadObj.optInt(ShortpayloadConstant.MAX_NOTIFICATION));
                         }
                         else
                             return;
