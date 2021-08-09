@@ -326,14 +326,18 @@ public class Util {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static String getDeviceLanguageTag()
     {
-        Locale locale;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            locale = iZooto.appContext.getResources().getConfiguration().getLocales().get(0);
-        } else {
-            locale = iZooto.appContext.getResources().getConfiguration().locale;
-        }
-        // Log.e("lanuguage",locale.getCountry());
-        return locale.getDefault().toLanguageTag();
+       if(iZooto.appContext!=null) {
+           Locale locale;
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+               locale = iZooto.appContext.getResources().getConfiguration().getLocales().get(0);
+               return locale.getDefault().getDisplayLanguage();
+           } else {
+              return "iz-ln";
+           }
+       }
+       else {
+           return "iz_ln";
+       }
 
     }
     public static String getTime() {

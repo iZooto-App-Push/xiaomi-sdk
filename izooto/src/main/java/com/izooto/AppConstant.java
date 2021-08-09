@@ -216,7 +216,7 @@ public interface AppConstant {
     String BADGE_COUNT = "badgeCount";
     String ADVERTISEMENT_ID = "advertisementID";
     String ISINSTALL="isInstall";
-    String CHANNEL_NAME="iZooto Notification";
+    String CHANNEL_NAME="Push Notifications";
     String DIALOG_DISMISS="Dismiss";
     String DIALOG_OK="Take me there";
     String URL_FWD="&frwd";
@@ -270,7 +270,7 @@ public interface AppConstant {
     String AD_NETWORK="an";
     String GLOBAL="g";
     String AD_TYPE="tp";
-    String SDKVERSION="1.1.0";
+    String SDKVERSION="1.1.1";
     String QSDK_VERSION="av";
     String SDKTYPE="sn";
     String SDK="SDKVERSION";
@@ -283,7 +283,6 @@ public interface AppConstant {
     String PUSH="push_type";
     String CHECK_XIAOMI="Check";
     String HMS_TOKEN = "hms_token";
-    String IS_UPDATED_HMS_TOKEN = "hms_token";
     String KEY_HMS="ht";
     String HMS_APP_ID="hms_app_id";
     String HMS="Huawei";
@@ -313,7 +312,14 @@ public interface AppConstant {
     String APPName_2="NotificationEventManager";
     String APPName_3="NotificationActionManager";
     String CLOUD_PUSH="iz_Counter";
-    String USER_LOCAL_DATA = "userLocalData";
+    String USER_LOCAL_DATA = "iz_userLocalData";
+    String SET_SUBSCRIPTION_DATA="iz_setSubscription";
+    String EVENT_LOCAL_DATA_EN = "eventLocalDataEN";
+    String EVENT_LOCAL_DATA_EV = "eventLocalDataEV";
+    String SET_SUBSCRITION_LOCAL_DATA = "setSubscriptionLocalData";
+    String IS_SET_SUBSCRIPTION_METHOD = "isSetSubscriptionMethod";
+    String IS_UPDATED_XIAOMI_TOKEN = "iz_xiaomi_token_updated";
+    String IS_UPDATED_HMS_TOKEN = "iz_hms_token_updated";
 
 }
 
