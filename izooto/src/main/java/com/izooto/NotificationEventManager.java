@@ -563,10 +563,16 @@ public class NotificationEventManager {
 
                 NotificationManager notificationManager =
                         (NotificationManager) iZooto.appContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                int notificaitionId = (int) System.currentTimeMillis();
+                int notificationId;
+                if (payload.getTag()!=null && !payload.getTag().isEmpty())
+                    notificationId = Util.convertStringToDecimal(payload.getTag());
+                else
+                    notificationId = (int) System.currentTimeMillis();
+
+
                 if (payload.getAct1name() != null && !payload.getAct1name().isEmpty()) {
                     String phone = getPhone(payload.getAct1link());
-                    Intent btn1 = notificationClick(payload,payload.getAct1link(),payload.getLink(),payload.getAct2link(),phone,clickIndex,lastView_Click,notificaitionId,1);
+                    Intent btn1 = notificationClick(payload,payload.getAct1link(),payload.getLink(),payload.getAct2link(),phone,clickIndex,lastView_Click,notificationId,1);
                     PendingIntent pendingIntent1 = PendingIntent.getBroadcast(iZooto.appContext, new Random().nextInt(100), btn1, PendingIntent.FLAG_UPDATE_CURRENT);
                     NotificationCompat.Action action1 =
                             new NotificationCompat.Action.Builder(
@@ -581,7 +587,7 @@ public class NotificationEventManager {
                 if (payload.getAct2name() != null && !payload.getAct2name().isEmpty()) {
 //                    btn2.setAction(AppConstant.ACTION_BTN_TWO);
                     String phone = getPhone(payload.getAct2link());
-                    Intent btn2 = notificationClick(payload,payload.getAct2link(),payload.getLink(),payload.getAct1link(),phone,clickIndex,lastView_Click,notificaitionId,2);
+                    Intent btn2 = notificationClick(payload,payload.getAct2link(),payload.getLink(),payload.getAct1link(),phone,clickIndex,lastView_Click,notificationId,2);
                     PendingIntent pendingIntent2 = PendingIntent.getBroadcast(iZooto.appContext, new Random().nextInt(100), btn2, PendingIntent.FLAG_UPDATE_CURRENT);
                     NotificationCompat.Action action2 =
                             new NotificationCompat.Action.Builder(
@@ -626,11 +632,7 @@ public class NotificationEventManager {
                     }
                 }
 
-                if (payload.getCollapseId()!=null && !payload.getCollapseId().isEmpty()){
-                    int notifyId = Util.convertStringToDecimal(payload.getCollapseId());
-                    notificationManager.notify(notifyId, notificationBuilder.build());
-                }else
-                    notificationManager.notify(notificaitionId, notificationBuilder.build());
+                    notificationManager.notify(notificationId, notificationBuilder.build());
                 try {
 
                     if(impressionIndex.equalsIgnoreCase("1")) {
@@ -895,10 +897,15 @@ public class NotificationEventManager {
 
                 NotificationManager notificationManager =
                         (NotificationManager) iZooto.appContext.getSystemService(Context.NOTIFICATION_SERVICE);
-                int notificaitionId = (int) System.currentTimeMillis();
+
+                int notificationID;
+                if (payload.getTag()!=null && !payload.getTag().isEmpty())
+                    notificationID = Util.convertStringToDecimal(payload.getTag());
+                else
+                    notificationID = (int) System.currentTimeMillis();
                 if (payload.getAct1name() != null && !payload.getAct1name().isEmpty()) {
                     String phone = getPhone(payload.getAct1link());
-                    Intent btn1 = notificationClick(payload,payload.getAct1link(),payload.getLink(),payload.getAct2link(),phone,clickIndex,lastView_Click,notificaitionId,1);
+                    Intent btn1 = notificationClick(payload,payload.getAct1link(),payload.getLink(),payload.getAct2link(),phone,clickIndex,lastView_Click,notificationID,1);
                     PendingIntent pendingIntent1 = PendingIntent.getBroadcast(iZooto.appContext, new Random().nextInt(100), btn1, PendingIntent.FLAG_UPDATE_CURRENT);
                     NotificationCompat.Action action1 =
                             new NotificationCompat.Action.Builder(
@@ -911,7 +918,7 @@ public class NotificationEventManager {
                 if (payload.getAct2name() != null && !payload.getAct2name().isEmpty()) {
 //                    btn2.setAction(AppConstant.ACTION_BTN_TWO);
                     String phone = getPhone(payload.getAct2link());
-                    Intent btn2 = notificationClick(payload,payload.getAct2link(),payload.getLink(),payload.getAct1link(),phone,clickIndex,lastView_Click,notificaitionId,2);
+                    Intent btn2 = notificationClick(payload,payload.getAct2link(),payload.getLink(),payload.getAct1link(),phone,clickIndex,lastView_Click,notificationID,2);
                     PendingIntent pendingIntent2 = PendingIntent.getBroadcast(iZooto.appContext, new Random().nextInt(100), btn2, PendingIntent.FLAG_UPDATE_CURRENT);
                     NotificationCompat.Action action2 =
                             new NotificationCompat.Action.Builder(
@@ -956,11 +963,11 @@ public class NotificationEventManager {
                     }
                 }
 
-                if (payload.getCollapseId()!=null && !payload.getCollapseId().isEmpty()){
-                    int notifyId = Util.convertStringToDecimal(payload.getCollapseId());
-                    notificationManager.notify(notifyId, notificationBuilder.build());
-                }else
-                    notificationManager.notify(notificaitionId, notificationBuilder.build());
+//                if (payload.getCollapseId()!=null && !payload.getCollapseId().isEmpty()){
+//                    int notifyId = Util.convertStringToDecimal(payload.getCollapseId());
+//                    notificationManager.notify(notifyId, notificationBuilder.build());
+//                }else
+                    notificationManager.notify(notificationID, notificationBuilder.build());
                 try {
 
                     if(impressionIndex.equalsIgnoreCase("1")) {

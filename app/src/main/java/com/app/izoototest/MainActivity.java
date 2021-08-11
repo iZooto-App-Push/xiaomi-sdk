@@ -40,7 +40,6 @@ public class MainActivity extends AppCompatActivity implements NotificationHelpe
 //        List<String> topicNale=new ArrayList<>();
 //        topicNale.add("DOB");
 //        iZooto.addTag(topicNale);
-        Log.e("Language", Locale.getDefault().toLanguageTag());
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

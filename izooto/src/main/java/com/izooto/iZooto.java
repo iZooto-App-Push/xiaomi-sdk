@@ -160,17 +160,22 @@ public class iZooto {
 
     }
     private static void initHmsService(final Context context){
+        if (context == null)
+            return;
+
         HMSTokenGenerator hmsTokenGenerator = new HMSTokenGenerator();
         hmsTokenGenerator.getHMSToken(context, new HMSTokenListener.HMSTokenGeneratorHandler() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void complete(String id) {
-                Log.i(AppConstant.APP_NAME_TAG, "HMS Token"+id);
-                PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-                if (!preferenceUtil.getBoolean(AppConstant.IS_UPDATED_HMS_TOKEN) && !id.isEmpty()) {
-                    preferenceUtil.setBooleanData(AppConstant.IS_UPDATED_HMS_TOKEN, true);
-                    preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, false);
-                    iZooto.registerToken();
+                Log.i(AppConstant.APP_NAME_TAG, "HMS Token - " + id);
+                PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
+                if (id != null && !id.isEmpty()) {
+                    if (!preferenceUtil.getBoolean(AppConstant.IS_UPDATED_HMS_TOKEN)) {
+                        preferenceUtil.setBooleanData(AppConstant.IS_UPDATED_HMS_TOKEN, true);
+                        preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, false);
+                        iZooto.registerToken();
+                    }
                 }
             }
 
