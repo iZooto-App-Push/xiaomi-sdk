@@ -225,15 +225,9 @@ public class NotificationActionReceiver extends BroadcastReceiver {
             final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
             String appVersion = Util.getSDKVersion(context);
             preferenceUtil.setStringData(AppConstant.CURRENT_DATE_CLICK, Util.getTime());
-            String encodeData = "";
-            try {
-                HashMap<String, Object> data = new HashMap<>();
-                data.put(AppConstant.LAST_NOTIFICAION_CLICKED, true);
-                JSONObject jsonObject = new JSONObject(data);
-                encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+
+
+
 
             String lciURL;
             int dataCfg = Util.getBinaryToDecimal(cfg);
@@ -243,11 +237,14 @@ public class NotificationActionReceiver extends BroadcastReceiver {
             } else
                 lciURL = RestClient.LASTNOTIFICATIONCLICKURL;
             try {
+                HashMap<String, Object> data = new HashMap<>();
+                data.put(AppConstant.LAST_NOTIFICAION_CLICKED, true);
+                JSONObject jsonObject = new JSONObject(data);
                 Map<String, String> mapData = new HashMap<>();
                 mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
                 mapData.put(AppConstant.VER_, appVersion);
                 mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(context));
-                mapData.put(AppConstant.VAL, "" + encodeData);
+                mapData.put(AppConstant.VAL, "" + jsonObject.toString());
                 mapData.put(AppConstant.ACT, "add");
                 mapData.put(AppConstant.ISID_, "1");
                 mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);

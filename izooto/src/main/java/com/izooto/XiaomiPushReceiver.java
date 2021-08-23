@@ -107,6 +107,8 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
                             payload.setPush_type(AppConstant.PUSH_XIAOMI);
                             payload.setSound(payloadObj.optString(ShortpayloadConstant.NOTIFICATION_SOUND));
                             payload.setMaxNotification(payloadObj.optInt(ShortpayloadConstant.MAX_NOTIFICATION));
+                            payload.setCustomNotification(payloadObj.optInt(ShortpayloadConstant.CUSTOM_NOTIFICATION));
+
                         }
                         else
                             return;

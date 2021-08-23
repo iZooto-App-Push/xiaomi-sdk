@@ -23,6 +23,8 @@ public class AppController extends Application implements TokenReceivedListener,
                 .setNotificationReceiveListener(this)
                 .setLandingURLListener(this)
                 .build();
+        iZooto.setCustomNotificationTemplate(true);
+        iZooto.setDefaultNotificationBanner(R.drawable.ic_baseline_share_24);
 
     }
 

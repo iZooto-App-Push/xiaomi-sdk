@@ -36,7 +36,6 @@ public interface AppConstant {
     String TRACK_NOTIFICATION_ID = "notificationId";
     String IS_NOTIFICATION_ID_UPDATED = "notificationIdUpdated";
     String NOTIFICATION_COUNT = "count";
-    String PAYLOAD_BADGE_COUNT = "payloadBadgeCount";
     String WEB_LANDING_URL = "webLandingUrl";
     String LOG_EVENT = "logEvent";
     String GET_FIREBASE_INSTANCE = "getInstance";
@@ -270,7 +269,7 @@ public interface AppConstant {
     String AD_NETWORK="an";
     String GLOBAL="g";
     String AD_TYPE="tp";
-    String SDKVERSION="1.3.0";
+    String SDKVERSION="1.3.2";
     String QSDK_VERSION="av";
     String SDKTYPE="sn";
     String SDK="SDKVERSION";
@@ -320,6 +319,8 @@ public interface AppConstant {
     String IS_SET_SUBSCRIPTION_METHOD = "isSetSubscriptionMethod";
     String IS_UPDATED_XIAOMI_TOKEN = "iz_xiaomi_token_updated";
     String IS_UPDATED_HMS_TOKEN = "iz_hms_token_updated";
+    String CUSTOM_NOTIFICATION = "iz_customNotification";
+    String PAYLOAD_JSONARRAY = "payloadJsonArray";
 
 }
 

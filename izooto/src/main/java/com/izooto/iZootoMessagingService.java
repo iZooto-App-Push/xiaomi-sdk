@@ -153,6 +153,7 @@ public class iZootoMessagingService extends FirebaseMessagingService {
                     payload.setPush_type(AppConstant.PUSH_FCM);
                     payload.setSound(payloadObj.optString(ShortpayloadConstant.NOTIFICATION_SOUND));
                     payload.setMaxNotification(payloadObj.optInt(ShortpayloadConstant.MAX_NOTIFICATION));
+                    payload.setCustomNotification(payloadObj.optInt(ShortpayloadConstant.CUSTOM_NOTIFICATION));
 
 
 
@@ -169,6 +170,7 @@ public class iZootoMessagingService extends FirebaseMessagingService {
             iZooto.appContext = this;
         Handler mainHandler = new Handler(Looper.getMainLooper());
         Runnable myRunnable = new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void run() {
                 iZooto.processNotificationReceived(payload);

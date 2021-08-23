@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,7 +13,6 @@ import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -25,8 +22,6 @@ import com.izooto.shortcutbadger.ShortcutBadger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +48,7 @@ public class iZooto {
     static Activity curActivity;
     public static String SDKDEF ="power-push";
     public static String soundID;
+    public static int bannerImage;
 
 
     public static boolean isHybrid = false; //check for SDK(Flutter,React native)
@@ -333,14 +329,9 @@ private static void registerToken() {
                 mapData.put(AppConstant.PACKAGE_NAME, "" + appContext.getPackageName());
                 mapData.put(AppConstant.SDKTYPE, "" + SDKDEF);
                 mapData.put(AppConstant.KEY_HMS, "" + preferenceUtil.getStringData(AppConstant.HMS_TOKEN));
-                try {
-                    String deviceName = URLEncoder.encode(Util.getDeviceName(), AppConstant.UTF);
-                    String osVersion = URLEncoder.encode(Build.VERSION.RELEASE, AppConstant.UTF);
-                    mapData.put(AppConstant.ANDROIDVERSION, "" + osVersion);
-                    mapData.put(AppConstant.DEVICENAME, "" + deviceName);
-                } catch (UnsupportedEncodingException e) {
-                    Lg.e(AppConstant.APP_NAME_TAG, AppConstant.UNEXCEPTION);
-                }
+                mapData.put(AppConstant.ANDROIDVERSION, "" + Build.VERSION.RELEASE);
+                mapData.put(AppConstant.DEVICENAME, "" + Util.getDeviceName());
+
                 RestClient.newPostRequest(RestClient.BASE_URL, mapData, new RestClient.ResponseHandler() {
                     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
                     @Override
@@ -426,6 +417,7 @@ private static void registerToken() {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public static void processNotificationReceived(Payload payload) {
         if(payload!=null) {
             NotificationEventManager.manageNotification(payload);
@@ -547,11 +539,61 @@ private static void registerToken() {
         }
 
     }
+    public static void notificationViewHybrid(String payloadList, Payload payload)
+    {
+        final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+        if(payload!=null)
+        {
+            if(mBuilder!=null && mBuilder.mNotificationReceivedHybridlistener !=null)
+            {
+                mBuilder.mNotificationReceivedHybridlistener.onNotificationReceivedHybrid(payloadList);
+            }
+            if (firebaseAnalyticsTrack != null && preferenceUtil.getBoolean(AppConstant.FIREBASE_ANALYTICS_TRACK)) {
+                firebaseAnalyticsTrack.receivedEventTrack(payload);
+            }else {
+                if (FirebaseAnalyticsTrack.canFirebaseAnalyticsTrack() && preferenceUtil.getBoolean(AppConstant.FIREBASE_ANALYTICS_TRACK)) {
+                    firebaseAnalyticsTrack = new FirebaseAnalyticsTrack(appContext);
+                    firebaseAnalyticsTrack.receivedEventTrack(payload);
+                }
+            }
+            if (payload.getId() != null && !payload.getId().isEmpty()) {
+                if (!payload.getId().equals(preferenceUtil.getStringData(AppConstant.TRACK_NOTIFICATION_ID))) {
+                    preferenceUtil.setBooleanData(AppConstant.IS_NOTIFICATION_ID_UPDATED, false);
+                }
+                preferenceUtil.setStringData(AppConstant.TRACK_NOTIFICATION_ID, payload.getId());
+            }
+        }
+    }
+    public static void notificationReceivedCallback(NotificationReceiveHybridListener notificationReceivedHybridListener){
+        mBuilder.mNotificationReceivedHybridlistener = notificationReceivedHybridListener;
+        if(mBuilder.mNotificationReceivedHybridlistener != null) {
+            runNotificationReceivedCallback();
+        }
+    }
+    private static void runNotificationReceivedCallback() {
+        runOnMainUIThread(new Runnable() {
+            public void run() {
+                final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+                if (NotificationEventManager.iZootoReceivedPayload != null) {
+                    iZooto.mBuilder.mNotificationReceivedHybridlistener.onNotificationReceivedHybrid(NotificationEventManager.iZootoReceivedPayload);
+//                    NotificationEventManager.iZootoReceivedPayload;
+                }
+                if (!preferenceUtil.getBoolean(AppConstant.IS_NOTIFICATION_ID_UPDATED)) {
+                    if (FirebaseAnalyticsTrack.canFirebaseAnalyticsTrack() && preferenceUtil.getBoolean(AppConstant.FIREBASE_ANALYTICS_TRACK)) {
+                        firebaseAnalyticsTrack = new FirebaseAnalyticsTrack(appContext);
+                        firebaseAnalyticsTrack.influenceOpenTrack();
+                        preferenceUtil.setBooleanData(AppConstant.IS_NOTIFICATION_ID_UPDATED, true);
+                    }
+                }
+            }
+        });
+    }
     public static class Builder {
         Context mContext;
         private TokenReceivedListener mTokenReceivedListener;
         private NotificationHelperListener mNotificationHelper;
         public NotificationWebViewListener mWebViewListener;
+        public NotificationReceiveHybridListener mNotificationReceivedHybridlistener;
 
         OSInAppDisplayOption mDisplayOption;
         private Builder(Context context) {
@@ -576,6 +618,10 @@ private static void registerToken() {
             mWebViewListener = mNotificationWebViewListener;
             return this;
 
+        }
+        public Builder setNotificationReceiveHybridListener(NotificationReceiveHybridListener notificationReceivedHybrid) {
+            mNotificationReceivedHybridlistener = notificationReceivedHybrid;
+            return this;
         }
 
 
@@ -686,23 +732,18 @@ private static void registerToken() {
     private static void addEventAPI(String eventName,HashMap<String,Object> data){
         if(appContext!=null) {
             final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-            String encodeData = "";
             HashMap<String, Object> filterEventData = checkValidationEvent(data, 1);
             if (filterEventData.size() > 0) {
                 try {
                     JSONObject jsonObject = new JSONObject(filterEventData);
-                    encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-
                     if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && Util.isNetworkAvailable(appContext)) {
                         if (!preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() || !preferenceUtil.getStringData(AppConstant.HMS_TOKEN).isEmpty() || !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty()) {
-
                             Map<String, String> mapData = new HashMap<>();
                             mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
                             mapData.put(AppConstant.ACT, eventName);
                             mapData.put(AppConstant.ET_, "evt");
                             mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
-                            mapData.put(AppConstant.VAL, "" + encodeData);
-
+                            mapData.put(AppConstant.VAL, "" + jsonObject.toString());
                             RestClient.newPostRequest(RestClient.EVENT_URL, mapData, new RestClient.ResponseHandler() {
                                 @Override
                                 void onSuccess(final String response) {
@@ -761,7 +802,6 @@ private static void registerToken() {
             return;
 
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-        String encodeData = "";
 
         try {
             if (object != null && object.size()>0) {
@@ -776,7 +816,6 @@ private static void registerToken() {
                     HashMap<String, Object> filterUserPropertyData = checkValidationUserProfile(newListUserProfile, 1);
                     if (filterUserPropertyData.size() > 0) {
                         JSONObject jsonObject = new JSONObject(filterUserPropertyData);
-                        encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
 
                         if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && Util.isNetworkAvailable(appContext)) {
                             if (!preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty() || !preferenceUtil.getStringData(AppConstant.HMS_TOKEN).isEmpty() || !preferenceUtil.getStringData(AppConstant.XiaomiToken).isEmpty()) {
@@ -785,7 +824,7 @@ private static void registerToken() {
                                 mapData.put(AppConstant.ACT, "add");
                                 mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);
                                 mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
-                                mapData.put(AppConstant.VAL, "" + encodeData);
+                                mapData.put(AppConstant.VAL, "" + jsonObject.toString());
 
                                 RestClient.newPostRequest(RestClient.PROPERTIES_URL, mapData, new RestClient.ResponseHandler() {
                                     @Override
@@ -988,6 +1027,8 @@ private static void registerToken() {
                     payload.setPush_type(AppConstant.PUSH_FCM);
                     payload.setSound(payloadObj.optString(ShortpayloadConstant.NOTIFICATION_SOUND));
                     payload.setMaxNotification(payloadObj.optInt(ShortpayloadConstant.MAX_NOTIFICATION));
+                    payload.setCustomNotification(payloadObj.optInt(ShortpayloadConstant.CUSTOM_NOTIFICATION));
+
                 } else
                     return;
 
@@ -1005,6 +1046,7 @@ private static void registerToken() {
             iZooto.appContext = context;
         Handler mainHandler = new Handler(Looper.getMainLooper());
         Runnable myRunnable = new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override
             public void run() {
                 iZooto.processNotificationReceived(payload);
@@ -1095,22 +1137,19 @@ private static void registerToken() {
             if (topic.size() > 0) {
                 final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
                 if (!preferenceUtil.getiZootoID(AppConstant.APPPID).isEmpty() && !preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN).isEmpty()) {
-                    String encodeData = "";
+
+
+
                     try {
                         HashMap<String, List<String>> data = new HashMap<>();
                         data.put(AppConstant.TOPIC, topic);
                         JSONObject jsonObject = new JSONObject(data);
-                        encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    try {
                         Map<String, String> mapData = new HashMap<>();
                         mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
                         mapData.put(AppConstant.ACT, action);
                         mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);
                         mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
-                        mapData.put(AppConstant.VAL, "" + encodeData);
+                        mapData.put(AppConstant.VAL, "" + jsonObject.toString());
                         mapData.put(AppConstant.TOKEN, "" + preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
                         mapData.put(AppConstant.BTYPE_, "" + AppConstant.BTYPE);
                         RestClient.newPostRequest(RestClient.PROPERTIES_URL, mapData, new RestClient.ResponseHandler() {
@@ -1183,22 +1222,15 @@ private static void registerToken() {
             String time = preferenceUtil.getStringData(AppConstant.CURRENT_DATE);
             if (!time.equalsIgnoreCase(getTime())) {
                 preferenceUtil.setStringData(AppConstant.CURRENT_DATE, getTime());
-                String encodeData = "";
                 try {
                     HashMap<String, Object> data = new HashMap<>();
                     data.put(AppConstant.LAST_WEBSITE_VISIT, true);
                     data.put(AppConstant.LANG_, Util.getDeviceLanguageTag());
                     JSONObject jsonObject = new JSONObject(data);
-                    encodeData = URLEncoder.encode(jsonObject.toString(), AppConstant.UTF);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                try {
                     Map<String, String> mapData = new HashMap<>();
                     mapData.put(AppConstant.PID, preferenceUtil.getiZootoID(AppConstant.APPPID));
                     mapData.put(AppConstant.ANDROID_ID, "" + Util.getAndroidId(appContext));
-                    mapData.put(AppConstant.VAL, "" + encodeData);
+                    mapData.put(AppConstant.VAL, "" + jsonObject.toString());
                     mapData.put(AppConstant.ACT, "add");
                     mapData.put(AppConstant.ISID_, "1");
                     mapData.put(AppConstant.ET_, "" + AppConstant.USERP_);
@@ -1225,6 +1257,20 @@ private static void registerToken() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd");
         String currentDate = sdf.format(new Date());
         return currentDate;
+    }
+    public static void setCustomNotificationTemplate(boolean setTemplate){
+        if(appContext!=null) {
+            final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
+            preferenceUtil.setBooleanData(AppConstant.CUSTOM_NOTIFICATION, setTemplate);
+        }
+        else
+        {
+            Log.e(AppConstant.APP_NAME_TAG,"Current object is not pass here");
+        }
+    }
+
+    public static void setDefaultNotificationBanner(int setBanner){
+        bannerImage = setBanner;
     }
 
 }

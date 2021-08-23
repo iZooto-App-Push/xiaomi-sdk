@@ -92,6 +92,8 @@ public class iZootoHmsMessagingService extends HmsMessageService {
                     payload.setPush_type(AppConstant.PUSH_HMS);
                     payload.setSound(payloadObj.optString(ShortpayloadConstant.NOTIFICATION_SOUND));
                     payload.setMaxNotification(payloadObj.optInt(ShortpayloadConstant.MAX_NOTIFICATION));
+                    payload.setCustomNotification(payloadObj.optInt(ShortpayloadConstant.CUSTOM_NOTIFICATION));
+
                 } else
                     return;
             }

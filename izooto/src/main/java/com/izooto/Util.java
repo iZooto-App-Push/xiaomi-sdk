@@ -435,10 +435,8 @@ public class Util {
                 mapData.put(AppConstant.EXCEPTION_, "" + exception);
                 mapData.put(AppConstant.METHOD_NAME, "" + methodName);
                 mapData.put(AppConstant.ClASS_NAME, "" + className);
-                String deviceName = URLEncoder.encode(Util.getDeviceName(), AppConstant.UTF);
-                String osVersion = URLEncoder.encode(Build.VERSION.RELEASE, AppConstant.UTF);
-                mapData.put(AppConstant.ANDROIDVERSION,"" + osVersion);
-                mapData.put(AppConstant.DEVICENAME,"" + deviceName);
+                mapData.put(AppConstant.ANDROIDVERSION,"" + Build.VERSION.RELEASE);
+                mapData.put(AppConstant.DEVICENAME,"" + Util.getDeviceName());
                 RestClient.newPostRequest(RestClient.APP_EXCEPTION_URL, mapData, new RestClient.ResponseHandler() {
                     @Override
                     void onSuccess(final String response) {
@@ -498,5 +496,9 @@ public class Util {
             list.add(value);
         }   return list;
     }
-
+     static String getTimeWithoutDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a");
+        String currentDate = sdf.format(new Date());
+        return currentDate;
+    }
 }

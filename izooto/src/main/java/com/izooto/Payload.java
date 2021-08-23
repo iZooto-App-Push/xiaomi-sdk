@@ -91,6 +91,8 @@ public class Payload {
     private String time_to_live;
     private String push_type;
     private int  maxNotification;
+    private int  CustomNotification;
+
 
     public int getMaxNotification() {
         return maxNotification;
@@ -612,5 +614,12 @@ public class Payload {
 
     public void setPush_type(String push_type) {
         this.push_type = push_type;
+    }
+    public int getCustomNotification() {
+        return CustomNotification;
+    }
+
+    public void setCustomNotification(int customNotification) {
+        CustomNotification = customNotification;
     }
 }
