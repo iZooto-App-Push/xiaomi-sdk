@@ -107,7 +107,7 @@ public class iZooto {
                                     String apiKey = jsonObject.optString(AppConstant.APIKEY);
                                     String mKey =jsonObject.optString(AppConstant.MIAPIKEY);
                                     String mId = jsonObject.optString(AppConstant.MIAPPID);
-                                    String hms_appId = jsonObject.optString(AppConstant.HMS_APP_ID);
+                                    String hms_appId =jsonObject.optString(AppConstant.HMS_APP_ID);
                                     mIzooToAppId = jsonObject.optString(AppConstant.APPPID);
                                     preferenceUtil.setiZootoID(AppConstant.APPPID, mIzooToAppId);
                                     trackAdvertisingId();
@@ -172,6 +172,7 @@ public class iZooto {
                         preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, false);
                         iZooto.registerToken();
                     }
+
                 }
             }
 
@@ -1258,10 +1259,10 @@ private static void registerToken() {
         String currentDate = sdf.format(new Date());
         return currentDate;
     }
-    public static void setCustomNotificationTemplate(boolean setTemplate){
+    public static void setDefaultTemplate(int previewID){
         if(appContext!=null) {
             final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-            preferenceUtil.setBooleanData(AppConstant.CUSTOM_NOTIFICATION, setTemplate);
+            preferenceUtil.setIntData(AppConstant.NOTIFICATION_PREVIEW, previewID);
         }
         else
         {

@@ -11,14 +11,26 @@ android {
         versionName "1.3.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
-                izooto_app_id: "a93348eba04f75f86a4d07e3eb88e6f9740bec6a"//"b7d70ad86cbd3664ec38d8a7c294bfd6452cf5e8"//"a93348eba04f75f86a4d07e3eb88e6f9740bec6a"
+                izooto_app_id: "268498c740eb5fae927dee2563e1d983bba71b71"//"a93348eba04f75f86a4d07e3eb88e6f9740bec6a"//"b7d70ad86cbd3664ec38d8a7c294bfd6452cf5e8"//"a93348eba04f75f86a4d07e3eb88e6f9740bec6a"
         ]
+    }
+    signingConfigs {
+        release {
+            storeFile file('/users/amit/documents/certificate/izooto_jks')
+            keyAlias 'key0'
+            keyPassword 'izooto'
+            storePassword 'izooto'
+        }
     }
 
     buildTypes {
         release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.release
         }
     }
 
@@ -44,3 +56,4 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
 }
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.huawei.agconnect'

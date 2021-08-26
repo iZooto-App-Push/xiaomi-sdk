@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity implements NotificationHelpe
         setSupportActionBar(toolbar);
         HashMap<String,Object> data= new HashMap<>();
         data.put("Language","Bangali");
+       // iZooto.setCustomNotificationTemplate(true);
       //  iZooto.addEvent("Xiaomi",data);
        iZooto.addUserProperty(data);
 //        List<String> topicNale=new ArrayList<>();

@@ -46,7 +46,7 @@ public class HMSTokenGenerator implements HMSTokenListener {
             if (!token.isEmpty()){
                 PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
                 preferenceUtil.setStringData(AppConstant.HMS_TOKEN,token);
-                Log.i(AppConstant.APP_NAME_TAG, "HMS generateToken: "+token);
+                Log.i(AppConstant.APP_NAME_TAG, "HMS generateToken:"+token);
                 handler.complete(token);
             }else {
                 handler.complete(null);

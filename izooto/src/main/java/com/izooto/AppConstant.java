@@ -269,7 +269,7 @@ public interface AppConstant {
     String AD_NETWORK="an";
     String GLOBAL="g";
     String AD_TYPE="tp";
-    String SDKVERSION="1.3.2";
+    String SDKVERSION="1.3.3";
     String QSDK_VERSION="av";
     String SDKTYPE="sn";
     String SDK="SDKVERSION";
@@ -321,6 +321,8 @@ public interface AppConstant {
     String IS_UPDATED_HMS_TOKEN = "iz_hms_token_updated";
     String CUSTOM_NOTIFICATION = "iz_customNotification";
     String PAYLOAD_JSONARRAY = "payloadJsonArray";
+    String NOTIFICATION_PREVIEW = "iz_notification_preview";
+
 
 }
 

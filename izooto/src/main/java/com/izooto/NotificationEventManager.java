@@ -426,11 +426,12 @@ public class NotificationEventManager {
 
         if (addCheck){
             receiveAds(payload);
+
         }else {
             final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(iZooto.appContext);
             if (Util.isAppInForeground(iZooto.appContext)){
                 if (iZooto.inAppOption==null || iZooto.inAppOption.equalsIgnoreCase(AppConstant.NOTIFICATION_)){
-                    if (payload.getCustomNotification() == 1 || preferenceUtil.getBoolean(AppConstant.CUSTOM_NOTIFICATION))
+                    if (payload.getCustomNotification() == 1 || preferenceUtil.getIntData(AppConstant.NOTIFICATION_PREVIEW)== PushTemplate.TEXT_OVERLAY)
                         NotificationCustomView.receiveCustomNotification(payload);
                     else
                         receivedNotification(payload);
@@ -438,14 +439,13 @@ public class NotificationEventManager {
                     showAlert(payload);
                 }
             }else {
-                if (payload.getCustomNotification() == 1 || preferenceUtil.getBoolean(AppConstant.CUSTOM_NOTIFICATION))
+                if (payload.getCustomNotification() == 1 || preferenceUtil.getIntData(AppConstant.NOTIFICATION_PREVIEW)==PushTemplate.TEXT_OVERLAY)
                     NotificationCustomView.receiveCustomNotification(payload);
                 else
                     receivedNotification(payload);
             }
         }
-    }
-    public static void receiveAds(final Payload payload){
+    }    public static void receiveAds(final Payload payload){
 
         final Handler handler = new Handler(Looper.getMainLooper());
         final Runnable notificationRunnable = new Runnable() {

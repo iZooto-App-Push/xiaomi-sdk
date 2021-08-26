@@ -8,6 +8,7 @@ import com.izooto.Lg;
 import com.izooto.NotificationHelperListener;
 import com.izooto.NotificationWebViewListener;
 import com.izooto.Payload;
+import com.izooto.PushTemplate;
 import com.izooto.TokenReceivedListener;
 import com.izooto.iZooto;
 
@@ -23,7 +24,7 @@ public class AppController extends Application implements TokenReceivedListener,
                 .setNotificationReceiveListener(this)
                 .setLandingURLListener(this)
                 .build();
-        iZooto.setCustomNotificationTemplate(true);
+        iZooto.setDefaultTemplate(PushTemplate.DEFAULT);
         iZooto.setDefaultNotificationBanner(R.drawable.ic_baseline_share_24);
 
     }

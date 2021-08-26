@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -244,7 +245,7 @@ public class RestClient {
             if (jsonBody != null)
                 con.setDoInput(true);
             if (method != null) {
-                if(method.equalsIgnoreCase(AppConstant.POST)) {
+                if(method.equalsIgnoreCase(AppConstant.POST) && jsonBody==null) {
                     con.setRequestProperty(AppConstant.CONTENT_TYPE, AppConstant.FORM_URL_ENCODED);
                 }
                 else {
@@ -261,6 +262,7 @@ public class RestClient {
                 OutputStream outputStream = con.getOutputStream();
                 outputStream.write(sendBytes);
             }
+
             httpResponse = con.getResponseCode();
             InputStream inputStream;
             Scanner scanner;
