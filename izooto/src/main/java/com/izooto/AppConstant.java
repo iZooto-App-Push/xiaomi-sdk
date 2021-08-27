@@ -5,7 +5,6 @@ public interface AppConstant {
     String APP_NAME_TAG = "iZooto";
 
     String FCM_DEVICE_TOKEN = "deviceToken";
-    String IZOOTO_SENDER_ID_KEY = "izooto_sender_id";
     String GOOGLE_JSON_URL = "https://cdn.izooto.com/app/app_";  //old
     String SDKNAME = "IZOOTO";
     String DEVICETOKEN="DEVICE TOKEN   ->  ";
@@ -36,7 +35,6 @@ public interface AppConstant {
     String TRACK_NOTIFICATION_ID = "notificationId";
     String IS_NOTIFICATION_ID_UPDATED = "notificationIdUpdated";
     String NOTIFICATION_COUNT = "count";
-    String WEB_LANDING_URL = "webLandingUrl";
     String LOG_EVENT = "logEvent";
     String GET_FIREBASE_INSTANCE = "getInstance";
     String UTM_SOURCE = "utm_source";
@@ -79,7 +77,6 @@ public interface AppConstant {
     String PTE_="pte";
     String CID_="cid";
     String RID_="rid";
-    String NOTIFICATION_OP="op";
     String ACTION="action";
     String PT_="pt";
     int PT = 0;
@@ -102,20 +99,16 @@ public interface AppConstant {
     int GE = 1;
 
 
-    String UPDATE_DEVICE_TOKEN = "https://aevents.izooto.com/izooto/api.php";
     String IZOOTO_ENCRYPTION_KEY = "izooto_enc_key";
     String IZOOTO_APP_ID = "izooto_app_id";
-    // String DATAB_APP_ID = "momagic_app_id";
 
     String ACTION_BTN_ONE = "actionBtnOne";
     String ACTION_BTN_TWO = "actionBtnTwo";
-    int NOTIFICAITON_REQ_CODE = 101;
     String KEY_WEB_URL = "WEB_URL";
     String KEY_NOTIFICITON_ID = "keyNotificationId";
     String IS_TOKEN_UPDATED = "isTokenUpdated";
     String DEVICE_REGISTRATION_TIMESTAMP = "deviceRegistrationTimeStamp";
     String KEY_IN_APP = "keyInApp";
-    String EVENT_URL="https://et.izooto.com/";
     String  KEY_IN_CID = "cid";
     String KEY_IN_RID = "rid";
     String KEY_IN_BUTOON="btn";
@@ -138,10 +131,7 @@ public interface AppConstant {
     String EXCEPTIONERROR = "Thrown Error";
     String UNEXCEPTION ="unsupported encoding exception";
     String CDN = "https://cdn.izooto.com/app/app_";
-    //String CDN = "https://cdn.izooto.com/app/";
-
     String MISSINGID="App Id is missing.";
-    // Register String
 
     String SENDERID ="senderId";
     String APPID = "appId";
@@ -188,7 +178,6 @@ public interface AppConstant {
     String CFG="cfg";
 
 
-    String NOTIFICATIONBODY="notifcationbody";
     String FIREBASEEXCEPTION ="exception";
     String FCMNAME = "FireBase Name";
     String NOTIFICATIONRECEIVED ="Short lived task is done.";
@@ -264,8 +253,6 @@ public interface AppConstant {
     String ISID_= "isid";
     String CHECK_MESSAGE="MESSAGE";
     String IS_HYBRID_SDK = "hybrid";
-
-
     String AD_NETWORK="an";
     String GLOBAL="g";
     String AD_TYPE="tp";
@@ -322,8 +309,17 @@ public interface AppConstant {
     String CUSTOM_NOTIFICATION = "iz_customNotification";
     String PAYLOAD_JSONARRAY = "payloadJsonArray";
     String NOTIFICATION_PREVIEW = "iz_notification_preview";
-
-
+    String DEVICE_ID = "{~DEVICEID~}";
+    String ANDROID_TOKEN = "{~TOKEN~}";
+    String R_XIAOMI_TOKEN = "{~MITOKEN~}";
+    String R_HMS_TOKEN = "{~HMSTOKEN~}";
+    String R_FCM_TOKEN="{~FCMTOKEN~}";
+    String CAN_GENERATE_HUAWEI_TOKEN = "iz_canGenerateHuaweiToken";
+    String CAN_GENERATE_XIAOMI_TOKEN = "iz_canGenerateXiaomiToken";
+    String CAN_GENERATE_FCM_TOKEN = "iz_canGenerateFcmToken";
+    String FCM_TOKEN_FROM_JSON = "fcmToken";
+    String XIAOMI_TOKEN_FROM_JSON = "xiaomiToken";
+    String HUAWEI_TOKEN_FROM_JSON = "huaweiToken";
 }
 
 

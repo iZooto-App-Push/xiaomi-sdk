@@ -19,6 +19,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.izooto.shortcutbadger.ShortcutBadger;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,7 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.izooto.AppConstant.FCM_TOKEN_FROM_JSON;
+import static com.izooto.AppConstant.HUAWEI_TOKEN_FROM_JSON;
 import static com.izooto.AppConstant.TAG;
+import static com.izooto.AppConstant.XIAOMI_TOKEN_FROM_JSON;
 
 public class iZooto {
     static Context appContext;
@@ -106,17 +110,18 @@ public class iZooto {
                                     String appId = jsonObject.optString(AppConstant.APPID);
                                     String apiKey = jsonObject.optString(AppConstant.APIKEY);
                                     String mKey =jsonObject.optString(AppConstant.MIAPIKEY);
-                                    String mId = jsonObject.optString(AppConstant.MIAPPID);
+                                    String mId =jsonObject.optString(AppConstant.MIAPPID);
                                     String hms_appId =jsonObject.optString(AppConstant.HMS_APP_ID);
                                     mIzooToAppId = jsonObject.optString(AppConstant.APPPID);
                                     preferenceUtil.setiZootoID(AppConstant.APPPID, mIzooToAppId);
                                     trackAdvertisingId();
-                                    if (!mKey.isEmpty() && !mId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Xiaomi")) {
+                                    if(!mKey.isEmpty() && !mId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Xiaomi") && !preferenceUtil.getBoolean(AppConstant.CAN_GENERATE_XIAOMI_TOKEN)){
                                         XiaomiSDKHandler xiaomiSDKHandler = new XiaomiSDKHandler(iZooto.appContext, mId, mKey);
                                         xiaomiSDKHandler.onMIToken();
                                     }
-                                    if (!hms_appId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Huawei"))
+                                    if (!hms_appId.isEmpty() && Build.MANUFACTURER.equalsIgnoreCase("Huawei")  && !preferenceUtil.getBoolean(AppConstant.CAN_GENERATE_HUAWEI_TOKEN)) {
                                         initHmsService(appContext);
+                                    }
                                     if (senderId != null && !senderId.isEmpty()) {
                                         init(context, apiKey, appId);
                                     } else {
@@ -281,7 +286,6 @@ public class iZooto {
     protected static void invokeFail(final Exception exception) {
         mHandler = new Handler(Looper.getMainLooper());
         mHandler.post(new Runnable() {
-
             @Override
             public void run() {
 
@@ -343,7 +347,18 @@ private static void registerToken() {
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mBuilder.mTokenReceivedListener.onTokenReceived(preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+                                    try {
+                                        JSONObject jsonObject = new JSONObject();
+                                        jsonObject.put(FCM_TOKEN_FROM_JSON, preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+                                        jsonObject.put(XIAOMI_TOKEN_FROM_JSON, preferenceUtil.getStringData(AppConstant.XiaomiToken));
+                                        jsonObject.put(HUAWEI_TOKEN_FROM_JSON, preferenceUtil.getStringData(AppConstant.HMS_TOKEN));
+                                        mBuilder.mTokenReceivedListener.onTokenReceived(jsonObject.toString());
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                     Log.e("Exception","Invalid JSON");
+                                    }
+
                                 }
                             });
                         }
@@ -379,7 +394,18 @@ private static void registerToken() {
             }
         } else {
             if (mBuilder != null && mBuilder.mTokenReceivedListener != null) {
-                mBuilder.mTokenReceivedListener.onTokenReceived(preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(FCM_TOKEN_FROM_JSON, preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+                    jsonObject.put(XIAOMI_TOKEN_FROM_JSON, preferenceUtil.getStringData(AppConstant.XiaomiToken));
+                    jsonObject.put(HUAWEI_TOKEN_FROM_JSON, preferenceUtil.getStringData(AppConstant.HMS_TOKEN));
+                    mBuilder.mTokenReceivedListener.onTokenReceived(jsonObject.toString());
+                }
+                catch (Exception ex)
+                {
+                    Log.e("Exception","Invalid JSON");
+                }
+
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 lastVisitApi(appContext);
@@ -1273,5 +1299,87 @@ private static void registerToken() {
     public static void setDefaultNotificationBanner(int setBanner){
         bannerImage = setBanner;
     }
+    public static iZooto.Builder initialize(Context context, String tokenJson) {
+        if (context == null)
+            return null;
 
+        try {
+            if (tokenJson !=null && !tokenJson.isEmpty()) {
+                if (isJSONValid(tokenJson)) {
+
+                    PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
+                    JSONObject data = new JSONObject(tokenJson);
+
+                    String fcmToken = data.optString(AppConstant.FCM_TOKEN_FROM_JSON);
+                    String xiaomiToken = data.optString(AppConstant.XIAOMI_TOKEN_FROM_JSON);
+                    String huaweiToken = data.optString(AppConstant.HUAWEI_TOKEN_FROM_JSON);
+
+                    if (data.has(AppConstant.HUAWEI_TOKEN_FROM_JSON)) {
+                        if (!huaweiToken.isEmpty()) {
+                            if (Build.MANUFACTURER.equalsIgnoreCase("Huawei")) {
+                                if (!huaweiToken.equals(preferenceUtil.getStringData(AppConstant.HMS_TOKEN))) {
+                                    preferenceUtil.setBooleanData(AppConstant.CAN_GENERATE_HUAWEI_TOKEN, true);
+                                    preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, false);
+                                    preferenceUtil.setBooleanData(AppConstant.IS_UPDATED_HMS_TOKEN, true);
+                                    preferenceUtil.setStringData(AppConstant.HMS_TOKEN, huaweiToken);
+                                }
+                            }
+                        } else {
+                            Util.setException(context, "Please put huawei token...", "initialize", AppConstant.APP_NAME_TAG);
+                        }
+                    }
+                    preferenceUtil.setBooleanData(AppConstant.CAN_GENERATE_FCM_TOKEN, true);
+                    if (data.has(AppConstant.FCM_TOKEN_FROM_JSON)) {
+                        if (!fcmToken.isEmpty()) {
+                            if (!fcmToken.equals(preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN))) {
+                                preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, false);
+                                preferenceUtil.setStringData(AppConstant.FCM_DEVICE_TOKEN, fcmToken);
+                            }
+                        } else {
+                            Util.setException(context, "Please put fcm token...", "initialize", AppConstant.APP_NAME_TAG);
+                        }
+                    }
+
+                    if (data.has(AppConstant.XIAOMI_TOKEN_FROM_JSON)) {
+                        if (!xiaomiToken.isEmpty()) {
+                            if (!xiaomiToken.equals(preferenceUtil.getStringData(AppConstant.XiaomiToken))) {
+                                preferenceUtil.setBooleanData(AppConstant.CAN_GENERATE_XIAOMI_TOKEN, true);
+                                preferenceUtil.setBooleanData(AppConstant.IS_TOKEN_UPDATED, false);
+                                preferenceUtil.setBooleanData(AppConstant.IS_UPDATED_XIAOMI_TOKEN, true);
+                                preferenceUtil.setStringData(AppConstant.XiaomiToken, xiaomiToken);
+                            }
+                        } else {
+                            Util.setException(context, "Please put xiaomi token...", "initialize", AppConstant.APP_NAME_TAG);
+                        }
+                    }
+                    return new iZooto.Builder(context);
+
+                }
+                else
+                {
+                    Log.e("iZooto","Given String is Not Valid JSON String");
+
+                }
+
+            }
+
+        } catch (Exception e) {
+            Util.setException(context, e.toString(), "initialize", AppConstant.APP_NAME_TAG);
+            e.printStackTrace();
+        }
+        return null;
+
+    }
+    public static boolean isJSONValid(String targetJson) {
+        try {
+            new JSONObject(targetJson);
+        } catch (JSONException ex) {
+            try {
+                new JSONArray(targetJson);
+            } catch (JSONException ex1) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

@@ -18,6 +18,16 @@ public class FCMTokenGenerator implements TokenGenerator {
 
     @Override
     public void getToken(final Context context, final String senderId, final String apiKey, final String appId, final TokenGenerationHandler callback) {
+
+       if(context==null)
+           return;
+
+        PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(context);
+        if (preferenceUtil.getBoolean(AppConstant.CAN_GENERATE_FCM_TOKEN)) {
+            if (callback != null)
+                callback.complete(preferenceUtil.getStringData(AppConstant.FCM_DEVICE_TOKEN));
+            return;
+        }
         new Thread(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
             @Override

@@ -377,11 +377,13 @@ public class AdMediation {
                     if(adIndex==6)
                     {
                         parseJson(payload, data, adIndex, indexValue);
+                        failsList.add(data);
 
                     }
                     else
                     {
                          failsList.add(data);
+
 
                     }
 
