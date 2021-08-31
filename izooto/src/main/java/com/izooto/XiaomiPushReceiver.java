@@ -153,6 +153,7 @@ public class XiaomiPushReceiver extends PushMessageReceiver {
             if(mi_token!=null)
             {
                 registerToken(context,mi_token);
+
             }
         }
         catch (Exception ex)

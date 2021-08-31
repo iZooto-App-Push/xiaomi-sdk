@@ -46,7 +46,6 @@ public class AppController extends Application implements TokenReceivedListener,
 
                     // Get new FCM registration token
                     String token = task.getResult();
-                    Log.e("TAG", "AppController onComplete:token -- "+token );
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put(AppConstant.FCM_TOKEN_FROM_JSON,token);
                     iZooto.initialize(AppController.this, jsonObject.toString())
@@ -54,6 +53,7 @@ public class AppController extends Application implements TokenReceivedListener,
                             .setLandingURLListener(AppController.this)
                             .setNotificationReceiveListener(AppController.this)
                             .build();
+                    iZooto.setDefaultTemplate(PushTemplate.TEXT_OVERLAY);
                 } catch (Exception e) {
                     Log.e("TAG", "onComplete: AppController" );
 

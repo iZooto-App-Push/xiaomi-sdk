@@ -296,7 +296,7 @@ public class iZooto {
         });
     }
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-private static void registerToken() {
+ static void registerToken() {
     if(appContext!=null) {
         final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
         if (!preferenceUtil.getBoolean(AppConstant.IS_TOKEN_UPDATED)) {
@@ -1285,10 +1285,10 @@ private static void registerToken() {
         String currentDate = sdf.format(new Date());
         return currentDate;
     }
-    public static void setDefaultTemplate(int previewID){
+    public static void setDefaultTemplate(int templateID){
         if(appContext!=null) {
             final PreferenceUtil preferenceUtil = PreferenceUtil.getInstance(appContext);
-            preferenceUtil.setIntData(AppConstant.NOTIFICATION_PREVIEW, previewID);
+            preferenceUtil.setIntData(AppConstant.NOTIFICATION_PREVIEW, templateID);
         }
         else
         {

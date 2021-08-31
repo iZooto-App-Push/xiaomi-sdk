@@ -2,8 +2,6 @@ package com.izooto;
 
 
 import android.os.Build;
-import android.util.Log;
-
 import androidx.annotation.RequiresApi;
 
 import org.json.JSONObject;
