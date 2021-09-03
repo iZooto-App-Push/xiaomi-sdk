@@ -10,7 +10,9 @@ iZooto can send push notifications powered by Xiaomi Cloud Push for Xiaomi brand
 
 #### Installation
 
-Please refer to iZooto's [Xiaomi PowerPush SDK Setup](https://help.izooto.com/docs/power-push-setting-up-xiaomi-cloud-push) page for Xiaomi setup and [Huawei PowerPush SDK Setup](https://help.izooto.com/docs/power-push-setting-up-huawei-messenger-service) page for Huawei setup to get step-by-step instructions on how to install the plugin.
+Please refer to iZooto's [PowerPush SDK Setup](https://help.izooto.com/docs/power-push-increase-delivery-rate) page to get step-by-step instructions on how to install the plugin.
+
+Also refer to [Xiaomi PowerPush SDK Setup](https://help.izooto.com/docs/power-push-setting-up-xiaomi-cloud-push) page for Xiaomi setup and [Huawei PowerPush SDK Setup](https://help.izooto.com/docs/power-push-setting-up-huawei-messenger-service) page for Huawei setup to see brand specific instructions.
 
 #### SDK Methods
 
